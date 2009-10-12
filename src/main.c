@@ -39,7 +39,7 @@ init (void)
 
     component = ibus_component_new ("org.freedesktop.IBus.Array",
                                     "Array 30 Input Method",
-                                    "0.1.0",
+                                    "0.0.1",
                                     "GPL",
                                     "Yu-Chun Wang <mainlander1122@gmail.com>",
                                     "http://code.google.com/p/ibus/",
