@@ -1,4 +1,5 @@
 #summary Installation guide for ibus-array.
+#labels Featured
 
 = Requirement =
   * *libibus-dev* on Debian/Ubuntu
