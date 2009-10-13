@@ -250,7 +250,7 @@ ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng)
     
     ibus_engine_update_preedit_text ((IBusEngine *)arrayeng,
                                      text,
-                                     arrayeng->cursor_pos,
+                                     array_preedit->len, //arrayeng->cursor_pos,
                                      TRUE);
     g_object_unref (text);
 
