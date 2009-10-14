@@ -70,6 +70,9 @@ static gboolean ibus_array_engine_process_candidate_key_event (IBusArrayEngine *
 static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arrayeng);
 static void ibus_array_engine_space_press(IBusArrayEngine *arrayeng);
 static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *arrayeng);
+static void ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, gchar* aux_string);
+
+static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng);
 
 static IBusEngineClass *parent_class = NULL;
 
@@ -164,6 +167,7 @@ static void ibus_array_engine_reset(IBusEngine *engine) {
     arrayeng->space_press_count = 0;
     ibus_array_engine_update_preedit (arrayeng);
     ibus_engine_hide_lookup_table (engine);
+    ibus_engine_hide_auxiliary_text (engine);
 
     parent_class->reset(engine);
 }
@@ -325,6 +329,7 @@ ibus_array_engine_update (IBusArrayEngine *arrayeng)
 {
     ibus_array_engine_update_preedit (arrayeng);
     ibus_array_engine_update_lookup_table(arrayeng);
+    ibus_array_engine_show_special_code(arrayeng);
 }
 
 //#define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z) || ((c) >= IBUS_A && (c) <= IBUS_Z))
@@ -544,4 +549,42 @@ static void ibus_array_engine_space_press(IBusArrayEngine *arrayeng) {
             ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
         }
     }
+}
+
+static void 
+ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, gchar* aux_string)
+{
+    IBusText *text;
+
+    if (aux_string) {
+        text = ibus_text_new_from_string(aux_string);
+        ibus_engine_update_auxiliary_text((IBusEngine*)arrayeng, text, TRUE);
+        g_object_unref(text);
+    }
+}
+
+static void 
+ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
+{
+    if (arrayeng->preedit->len != 2) {
+        ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
+        return;
+    }
+
+    GArray* candidates = array_get_reverted_char_candidates_from_special(array_context, arrayeng->preedit->str);
+    if (candidates->len == 1) {
+        gchar* sch = g_array_index(candidates, gchar*, 0);
+        GString* keystr = array_get_preedit_string(arrayeng->preedit);
+        gchar* show_str = g_strdup_printf("%s: %s", sch, keystr->str);
+
+        ibus_array_engine_update_auxiliary_text(arrayeng, show_str);
+
+        g_string_free(keystr, TRUE);
+        g_free(show_str);
+    }
+    else {
+        ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
+    }
+
+    array_release_candidates(candidates);
 }

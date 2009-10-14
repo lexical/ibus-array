@@ -161,7 +161,7 @@ GArray* array_get_candidates_from_special(ArrayContext *context, gchar *keys) {
     return result;
 }
 
-GArray* array_get_reverted_candidates_from_special(ArrayContext *context, gchar *ch) {
+GArray* array_get_reverted_key_candidates_from_special(ArrayContext *context, gchar *ch) {
     GArray *result;
     result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
 
@@ -175,6 +175,28 @@ GArray* array_get_reverted_candidates_from_special(ArrayContext *context, gchar 
             gchar *keys = (gchar*)sqlite3_column_text(stmt, 0);
             gchar *keysstr = g_strdup(keys);
             g_array_append_val(result, keysstr);
+        }
+    }
+    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
+
+    return result;
+}
+
+GArray* array_get_reverted_char_candidates_from_special(ArrayContext *context, gchar *keys) {
+    GArray *result;
+    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
+
+    sqlite3_stmt *stmt;
+
+    int retcode;
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM special WHERE keys=?", -1, &stmt, NULL);
+    if (retcode == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
+            gchar *chstr = g_strdup(ch);
+            g_array_append_val(result, chstr);
         }
     }
     sqlite3_reset(stmt);
