@@ -546,7 +546,8 @@ static void ibus_array_engine_space_press(IBusArrayEngine *arrayeng) {
              }
         }
         else {
-            ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
+            //ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
+            ibus_array_engine_reset((IBusEngine*)arrayeng);
         }
     }
 }
