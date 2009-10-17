@@ -56,6 +56,9 @@ PKG_CHECK_MODULES(IBUS, [
     ibus-1.0
 ])
 
+#check python
+AM_PATH_PYTHON([2.5])
+
 # check sqlite3
 #PKG_CHECK_MODULES(SQLITE3, [
 #    sqlite3
@@ -77,6 +80,9 @@ ibus-array.spec
 src/Makefile
 src/array.xml.in
 icons/Makefile
+setup/Makefile
+setup/ibus-setup-array
+setup/config.py
 data/Makefile
 m4/Makefile
 )
