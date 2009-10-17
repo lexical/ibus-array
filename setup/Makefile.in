@@ -17,9 +17,9 @@
 
 # vim:set noet ts=4:
 #
-# ibus-tmpl - The Input Bus template project
+# ibus-hangul - The Hangul Engine For IBus
 #
-# Copyright (c) 2007-2008 Huang Peng <shawn.p.huang@gmail.com>
+# Copyright (c) 2009 Choe Hwanjin <choe.hwanjin@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -53,8 +54,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = m4
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+subdir = setup
+DIST_COMMON = $(setup_hangul_PYTHON) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/config.py.in \
+	$(srcdir)/ibus-setup-array.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-version.m4 \
 	$(top_srcdir)/m4/gettext.m4 $(top_srcdir)/m4/iconv.m4 \
@@ -68,10 +71,35 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = ibus-setup-array config.py
 CONFIG_CLEAN_VPATH_FILES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__installdirs = "$(DESTDIR)$(libexecdir)" \
+	"$(DESTDIR)$(setup_hanguldir)" "$(DESTDIR)$(setup_hanguldir)"
+SCRIPTS = $(libexec_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
+py_compile = $(top_srcdir)/py-compile
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -223,9 +251,20 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+setup_hangul_PYTHON = \
+	main.py \
+	$(NULL)
+
+nodist_setup_hangul_PYTHON = config.py
+setup_hanguldir = $(datadir)/ibus-array/setup
+libexec_SCRIPTS = ibus-setup-array
+CLEANFILES = \
+	*.pyc \
+	$(NULL)
+
 EXTRA_DIST = \
-    as-version.m4 \
-    $(NULL)
+	ibus-setup-array.in \
+	$(NULL)
 
 all: all-am
 
@@ -239,9 +278,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu m4/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu setup/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu m4/Makefile
+	  $(AUTOMAKE) --gnu setup/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -260,12 +299,126 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+ibus-setup-array: $(top_builddir)/config.status $(srcdir)/ibus-setup-array.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+config.py: $(top_builddir)/config.status $(srcdir)/config.py.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+install-libexecSCRIPTS: $(libexec_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	test -z "$(libexecdir)" || $(MKDIR_P) "$(DESTDIR)$(libexecdir)"
+	@list='$(libexec_SCRIPTS)'; test -n "$(libexecdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(libexecdir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(libexecdir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-libexecSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(libexec_SCRIPTS)'; test -n "$(libexecdir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(libexecdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(libexecdir)" && rm -f $$files
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-nodist_setup_hangulPYTHON: $(nodist_setup_hangul_PYTHON)
+	@$(NORMAL_INSTALL)
+	test -z "$(setup_hanguldir)" || $(MKDIR_P) "$(DESTDIR)$(setup_hanguldir)"
+	@list='$(nodist_setup_hangul_PYTHON)'; dlist=; list2=; test -n "$(setup_hanguldir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then b=; else b="$(srcdir)/"; fi; \
+	  if test -f $$b$$p; then \
+	    $(am__strip_dir) \
+	    dlist="$$dlist $$f"; \
+	    list2="$$list2 $$b$$p"; \
+	  else :; fi; \
+	done; \
+	for file in $$list2; do echo $$file; done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(setup_hanguldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(setup_hanguldir)" || exit $$?; \
+	done || exit $$?; \
+	if test -n "$$dlist"; then \
+	  if test -z "$(DESTDIR)"; then \
+	    PYTHON=$(PYTHON) $(py_compile) --basedir "$(setup_hanguldir)" $$dlist; \
+	  else \
+	    PYTHON=$(PYTHON) $(py_compile) --destdir "$(DESTDIR)" --basedir "$(setup_hanguldir)" $$dlist; \
+	  fi; \
+	else :; fi
+
+uninstall-nodist_setup_hangulPYTHON:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_setup_hangul_PYTHON)'; test -n "$(setup_hanguldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	filesc=`echo "$$files" | sed 's|$$|c|'`; \
+	fileso=`echo "$$files" | sed 's|$$|o|'`; \
+	echo " ( cd '$(DESTDIR)$(setup_hanguldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(setup_hanguldir)" && rm -f $$files || exit $$?; \
+	echo " ( cd '$(DESTDIR)$(setup_hanguldir)' && rm -f" $$filesc ")"; \
+	cd "$(DESTDIR)$(setup_hanguldir)" && rm -f $$filesc || exit $$?; \
+	echo " ( cd '$(DESTDIR)$(setup_hanguldir)' && rm -f" $$fileso ")"; \
+	cd "$(DESTDIR)$(setup_hanguldir)" && rm -f $$fileso
+install-setup_hangulPYTHON: $(setup_hangul_PYTHON)
+	@$(NORMAL_INSTALL)
+	test -z "$(setup_hanguldir)" || $(MKDIR_P) "$(DESTDIR)$(setup_hanguldir)"
+	@list='$(setup_hangul_PYTHON)'; dlist=; list2=; test -n "$(setup_hanguldir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then b=; else b="$(srcdir)/"; fi; \
+	  if test -f $$b$$p; then \
+	    $(am__strip_dir) \
+	    dlist="$$dlist $$f"; \
+	    list2="$$list2 $$b$$p"; \
+	  else :; fi; \
+	done; \
+	for file in $$list2; do echo $$file; done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(setup_hanguldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(setup_hanguldir)" || exit $$?; \
+	done || exit $$?; \
+	if test -n "$$dlist"; then \
+	  if test -z "$(DESTDIR)"; then \
+	    PYTHON=$(PYTHON) $(py_compile) --basedir "$(setup_hanguldir)" $$dlist; \
+	  else \
+	    PYTHON=$(PYTHON) $(py_compile) --destdir "$(DESTDIR)" --basedir "$(setup_hanguldir)" $$dlist; \
+	  fi; \
+	else :; fi
+
+uninstall-setup_hangulPYTHON:
+	@$(NORMAL_UNINSTALL)
+	@list='$(setup_hangul_PYTHON)'; test -n "$(setup_hanguldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	filesc=`echo "$$files" | sed 's|$$|c|'`; \
+	fileso=`echo "$$files" | sed 's|$$|o|'`; \
+	echo " ( cd '$(DESTDIR)$(setup_hanguldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(setup_hanguldir)" && rm -f $$files || exit $$?; \
+	echo " ( cd '$(DESTDIR)$(setup_hanguldir)' && rm -f" $$filesc ")"; \
+	cd "$(DESTDIR)$(setup_hanguldir)" && rm -f $$filesc || exit $$?; \
+	echo " ( cd '$(DESTDIR)$(setup_hanguldir)' && rm -f" $$fileso ")"; \
+	cd "$(DESTDIR)$(setup_hanguldir)" && rm -f $$fileso
 tags: TAGS
 TAGS:
 
@@ -305,8 +458,11 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(SCRIPTS)
 installdirs:
+	for dir in "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(setup_hanguldir)" "$(DESTDIR)$(setup_hanguldir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -324,6 +480,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -352,13 +509,14 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-nodist_setup_hangulPYTHON \
+	install-setup_hangulPYTHON
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-libexecSCRIPTS
 
 install-html: install-html-am
 
@@ -396,7 +554,9 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-libexecSCRIPTS \
+	uninstall-nodist_setup_hangulPYTHON \
+	uninstall-setup_hangulPYTHON
 
 .MAKE: install-am install-strip
 
@@ -405,12 +565,22 @@ uninstall-am:
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install-info install-info-am install-libexecSCRIPTS \
+	install-man install-nodist_setup_hangulPYTHON install-pdf \
+	install-pdf-am install-ps install-ps-am \
+	install-setup_hangulPYTHON install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-libexecSCRIPTS uninstall-nodist_setup_hangulPYTHON \
+	uninstall-setup_hangulPYTHON
 
+
+test:
+	$(ENV) DBUS_DEBUG=true \
+		   LANG=en_US \
+		   PYTHONPATH=$(abs_top_srcdir):$(pyexecdir) \
+		   $(PYTHON) $(srcdir)/main.py
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

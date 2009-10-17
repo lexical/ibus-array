@@ -32,7 +32,8 @@ ibus_engine_array_SOURCES = \
 	$(NULL)
 ibus_engine_array_CFLAGS = \
 	@IBUS_CFLAGS@ \
-	-DPKGDATADIR=\"$(pkgdatadir)\"
+	-DPKGDATADIR=\"$(pkgdatadir)\" \
+    -DLIBEXECDIR=\"$(libexecdir)\" \
 	$(NULL)
 ibus_engine_array_LDFLAGS = \
 	@IBUS_LIBS@ \

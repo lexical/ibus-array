@@ -17,6 +17,7 @@ struct _IBusArrayEngine {
     guint space_press_count;
 
     IBusLookupTable *table;
+    IBusPropList *prop_list;
 };
 
 struct _IBusArrayEngineClass {
@@ -50,9 +51,9 @@ static void ibus_array_engine_page_up     (IBusEngine             *engine);
 static void ibus_array_engine_page_down   (IBusEngine             *engine);
 static void ibus_array_engine_cursor_up   (IBusEngine             *engine);
 static void ibus_array_engine_cursor_down (IBusEngine             *engine);
-static void ibus_array_property_activate  (IBusEngine             *engine,
-                                             const gchar            *prop_name,
-                                             gint                    prop_state);
+static void ibus_array_engine_property_activate (IBusEngine *engine,
+                                             const gchar *prop_name,
+                                             gint prop_state);
 static void ibus_array_engine_property_show
 											(IBusEngine             *engine,
                                              const gchar            *prop_name);
@@ -74,7 +75,16 @@ static void ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, g
 
 static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng);
 
+static void ibus_config_value_changed (IBusConfig *config, 
+                                        const gchar *section, 
+                                        const gchar *name, 
+                                        GValue *value, 
+                                        gpointer user_data);
+
 static IBusEngineClass *parent_class = NULL;
+static IBusConfig *config = NULL;
+static gboolean is_special_notify;
+static gboolean is_special_only;
 
 static ArrayContext *array_context = NULL;
 
@@ -108,13 +118,40 @@ ibus_array_engine_get_type (void)
 void 
 ibus_array_init (IBusBus *bus) 
 {
+    gboolean res;
+    GValue value = { 0, };
+
     array_context = array_create_context();
+
+    config = ibus_bus_get_config (bus);
+
+    is_special_notify = FALSE;
+    is_special_only = FALSE;
+
+    res = ibus_config_get_value (config, "engine/Array", 
+                                "SpecialNotify", &value);
+    if (res) {
+        const gchar* str = g_value_get_string(&value);
+        if (g_strcmp0(str, "1") == 0)
+            is_special_notify = TRUE;
+    }
+
+    res = ibus_config_get_value (config, "engine/Array", 
+                                "SpecialOnly", &value);
+    if (res) {
+        const gchar* str = g_value_get_string(&value);
+        if (g_strcmp0(str, "1") == 0)
+            is_special_only = TRUE;
+    }
 }
 
 void 
 ibus_array_exit (void) 
 {
     array_release_context(array_context);    
+
+    g_object_unref(config);
+    config = NULL;
 }
 
 static void
@@ -132,21 +169,51 @@ ibus_array_engine_class_init (IBusArrayEngineClass *klass)
 
     engine_class->page_up = ibus_array_engine_page_up;
     engine_class->page_down = ibus_array_engine_page_down;
+
+    engine_class->focus_in = ibus_array_engine_focus_in;
+    engine_class->focus_out = ibus_array_engine_focus_out;
+
+    engine_class->property_activate = ibus_array_engine_property_activate;
 }
 
 static void
 ibus_array_engine_init (IBusArrayEngine *arrayeng)
 {
+    IBusProperty *setup_prop;
+    IBusText *setup_label;
+    IBusText *setup_tooltip;
+
     arrayeng->preedit = g_string_new ("");
     arrayeng->cursor_pos = 0;
     arrayeng->space_press_count = 0;
 
     arrayeng->table = ibus_lookup_table_new (10, 0, FALSE, TRUE);
+    setup_label = ibus_text_new_from_string("Setup");
+    setup_tooltip = ibus_text_new_from_string("Configure Array 30 engine");
+    setup_prop = ibus_property_new("setup", 
+                                    PROP_TYPE_NORMAL,
+                                    setup_label,
+                                    "gtk-preferences",
+                                    setup_tooltip,
+                                    TRUE, TRUE, 0, NULL);
+    g_object_unref(setup_label);
+    g_object_unref(setup_tooltip);
+
+    arrayeng->prop_list = ibus_prop_list_new();
+    ibus_prop_list_append(arrayeng->prop_list, setup_prop);
+    g_object_unref(setup_prop);
+
+    g_signal_connect (config, "value-changed",
+            G_CALLBACK(ibus_config_value_changed), arrayeng);
 }
 
 static void
 ibus_array_engine_destroy (IBusArrayEngine *arrayeng)
 {
+    if (arrayeng->prop_list) {
+        g_object_unref(arrayeng->prop_list);
+        arrayeng->prop_list = NULL;
+    }
     if (arrayeng->preedit) {
         g_string_free (arrayeng->preedit, TRUE);
         arrayeng->preedit = NULL;
@@ -184,7 +251,19 @@ ibus_array_engine_page_down (IBusEngine *engine)
         parent_class->page_down (engine);
 }
 
+static void ibus_array_engine_focus_in (IBusEngine *engine)
+{
+    IBusArrayEngine *arrayeng = (IBusArrayEngine*)engine;
 
+    ibus_engine_register_properties (engine, arrayeng->prop_list);
+
+    parent_class->focus_in (engine);
+}
+
+static void ibus_array_engine_focus_out (IBusEngine *engine) 
+{
+    parent_class->focus_out (engine);
+}
 
 static void
 ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
@@ -567,6 +646,9 @@ ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, gchar* aux_st
 static void 
 ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
 {
+    if (!is_special_notify)
+        return;
+
     if (arrayeng->preedit->len != 2) {
         ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
         return;
@@ -588,4 +670,57 @@ ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
     }
 
     array_release_candidates(candidates);
+}
+
+static void ibus_array_engine_property_activate  (IBusEngine *engine, 
+                                            const gchar *prop_name, 
+                                            gint prop_state)
+{
+    if (g_strcmp0(prop_name, "setup") == 0) {
+        GError *error = NULL;
+        gchar *argv[2] = { NULL, };
+        gchar *path;
+        const char* libexecdir;
+
+        libexecdir = g_getenv("LIBEXECDIR");
+        if (libexecdir == NULL)
+            libexecdir = LIBEXECDIR;
+
+        path = g_build_filename(libexecdir, "ibus-setup-array", NULL);
+        argv[0] = path;
+        argv[1] = NULL;
+        g_spawn_async (NULL, argv, NULL, 0, NULL, NULL, NULL, &error);
+
+        g_free(path);
+    }
+}
+
+static void ibus_config_value_changed (IBusConfig *config, 
+                                        const gchar *section, 
+                                        const gchar *name, 
+                                        GValue *value, 
+                                        gpointer user_data)
+{
+    IBusArrayEngine *arrayeng = (IBusArrayEngine*)user_data;
+
+    if (g_strcmp0(section, "engine/Array") == 0) {
+        if (g_strcmp0(name, "SpecialNotify") == 0) {
+            const gchar* str = g_value_get_string(value);
+            if (g_strcmp0(str, "1") == 0) {
+                is_special_notify = TRUE;
+            }
+            else {
+                is_special_notify = FALSE;
+            }
+        }
+        else if (g_strcmp0(name, "SpecialOnly") == 0) {
+            const gchar* str = g_value_get_string(value);
+            if (g_strcmp0(str, "1") == 0) {
+                is_special_only = TRUE;
+            }
+            else {
+                is_special_only = FALSE;
+            }
+        }
+    }
 }

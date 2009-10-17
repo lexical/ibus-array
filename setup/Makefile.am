@@ -1,8 +1,8 @@
 # vim:set noet ts=4:
 #
-# ibus-tmpl - The Input Bus template project
+# ibus-hangul - The Hangul Engine For IBus
 #
-# Copyright (c) 2007-2008 Huang Peng <shawn.p.huang@gmail.com>
+# Copyright (c) 2009 Choe Hwanjin <choe.hwanjin@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,39 +18,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-SUBDIRS = \
-	src \
-    setup \
-	icons \
-    data \
-	m4 \
-	po \
+setup_hangul_PYTHON = \
+	main.py \
 	$(NULL)
 
-ACLOCAL_AMFLAGS = -I m4
+nodist_setup_hangul_PYTHON = config.py
+
+setup_hanguldir = $(datadir)/ibus-array/setup
+
+libexec_SCRIPTS = ibus-setup-array
+
+CLEANFILES = \
+	*.pyc \
+	$(NULL)
 
 EXTRA_DIST = \
-	autogen.sh \
-	@PACKAGE_NAME@.spec.in \
+	ibus-setup-array.in \
 	$(NULL)
 
-noinst_DIST = \
-	$(NULL)
+test:
+	$(ENV) DBUS_DEBUG=true \
+		   LANG=en_US \
+		   PYTHONPATH=$(abs_top_srcdir):$(pyexecdir) \
+		   $(PYTHON) $(srcdir)/main.py
 
-
-DISTCLEANFILES = \
-	po/stamp-it \
-	$(NULL)
-
-rpm: dist @PACKAGE_NAME@.spec
-	rpmbuild -bb \
-			--define "_sourcedir `pwd`" \
-			--define "_builddir `pwd`" \
-			--define "_specdir `pwd`" \
-			--define "_rpmdir `pwd`" \
-			--define "_srcrpmdir `pwd`" \
-			@PACKAGE_NAME@.spec
-clean-rpm:
-	$(RM) -r "`uname -i`"
-
-clean-local: clean-rpm
