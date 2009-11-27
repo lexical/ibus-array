@@ -74,6 +74,7 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
 static void ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, gchar* aux_string);
 
 static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng);
+static void ibus_array_engine_show_special_code_for_char(IBusArrayEngine *arrayeng, gchar *ch);
 
 static void ibus_config_value_changed (IBusConfig *config, 
                                         const gchar *section, 
@@ -380,15 +381,44 @@ static gboolean
 ibus_array_engine_commit_current_candidate (IBusArrayEngine *arrayeng) {
     guint cursor_pos;
     const char* value;
+    gchar *temptext;
     IBusText* text;
+    gboolean check_special = FALSE;
 
     cursor_pos = ibus_lookup_table_get_cursor_pos (arrayeng->table);
     text = ibus_lookup_table_get_candidate(arrayeng->table, cursor_pos);
 
     if (g_strcmp0(text->text, ARRAY_SHORT_CODE_EMPTY_STRING) != 0) {
+        temptext = g_strdup(text->text);
+
+        if (is_special_only || is_special_notify) {
+            check_special = array_input_key_is_not_special(
+                    array_context, arrayeng->preedit->str, text->text);
+
+            if (check_special) {
+                if (is_special_notify) {
+                    ibus_array_engine_show_special_code_for_char(
+                                        arrayeng, text->text);
+                }
+                if (is_special_only) {
+                    return FALSE;
+                }
+            }
+        }
         ibus_engine_commit_text((IBusEngine*)arrayeng, text);
+        
+        ibus_array_engine_reset((IBusEngine*)arrayeng);
+
+        if (is_special_notify && check_special) {
+            ibus_array_engine_show_special_code_for_char(arrayeng, temptext);
+        }
+
+        g_free(temptext);
+
         return TRUE;
     }
+
+    ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
 
     return FALSE;
 }
@@ -463,8 +493,8 @@ ibus_array_engine_process_key_event (IBusEngine *engine,
         //return ibus_array_engine_commit_preedit (arrayeng);
 
     case IBUS_Escape:
-        if (arrayeng->preedit->len == 0)
-            return FALSE;
+        /*if (arrayeng->preedit->len == 0)
+            return FALSE;*/
         ibus_array_engine_reset((IBusEngine*)arrayeng);
         return TRUE;        
 
@@ -530,8 +560,8 @@ ibus_array_engine_process_key_event (IBusEngine *engine,
 
                 commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
 
-                if (commit_rev)
-                    ibus_array_engine_reset((IBusEngine*)arrayeng);
+                /*if (commit_rev)
+                    ibus_array_engine_reset((IBusEngine*)arrayeng);*/
             }
         }
 
@@ -574,8 +604,8 @@ ibus_array_engine_process_candidate_key_event (IBusArrayEngine *arrayeng,
 
         commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
 
-        if (commit_rev)
-            ibus_array_engine_reset((IBusEngine*)arrayeng);
+        /*if (commit_rev)
+            ibus_array_engine_reset((IBusEngine*)arrayeng);*/
     }
 
     return TRUE;
@@ -601,12 +631,12 @@ static void ibus_array_engine_space_press(IBusArrayEngine *arrayeng) {
             ibus_lookup_table_set_cursor_pos(arrayeng->table, 0);
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
 
-            if (commit_rev) {
+            /*if (commit_rev) {
                 ibus_array_engine_reset((IBusEngine*)arrayeng);
             }
             else {
                 ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
-            }
+            }*/
         }
     }
     else if (arrayeng->space_press_count == 1) {
@@ -618,11 +648,11 @@ static void ibus_array_engine_space_press(IBusArrayEngine *arrayeng) {
 
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
 
-            if (commit_rev)
+            /*if (commit_rev)
                 ibus_array_engine_reset((IBusEngine*)arrayeng);
             else {
                 ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
-             }
+             }*/
         }
         else {
             //ibus_engine_hide_lookup_table((IBusEngine*)arrayeng);
@@ -662,6 +692,32 @@ ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
 
         ibus_array_engine_update_auxiliary_text(arrayeng, show_str);
 
+        g_string_free(keystr, TRUE);
+        g_free(show_str);
+    }
+    else {
+        ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
+    }
+
+    array_release_candidates(candidates);
+}
+
+static void ibus_array_engine_show_special_code_for_char(
+                            IBusArrayEngine *arrayeng, gchar *ch)
+{
+    if (!is_special_notify)
+        return;
+
+    GArray* candidates = array_get_reverted_key_candidates_from_special(array_context, ch);
+    if (candidates->len == 1) {
+        gchar* rawkeys = g_array_index(candidates, gchar*, 0);
+        GString *rawkeystr = g_string_new(rawkeys);
+        GString* keystr = array_get_preedit_string(rawkeystr);
+        gchar* show_str = g_strdup_printf("%s: %s", ch, keystr->str);
+
+        ibus_array_engine_update_auxiliary_text(arrayeng, show_str);
+
+        g_string_free(rawkeystr, TRUE);
         g_string_free(keystr, TRUE);
         g_free(show_str);
     }
