@@ -23,7 +23,7 @@ m4_define([package_name], [ibus-array])
 m4_define([ibus_released], [0])
 m4_define([ibus_major_version], [0])
 m4_define([ibus_minor_version], [0])
-m4_define([ibus_micro_version], [1])
+m4_define([ibus_micro_version], [2])
 
 m4_define([ibus_version],
     ibus_major_version.ibus_minor_version.ibus_micro_version)
