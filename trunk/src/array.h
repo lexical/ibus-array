@@ -18,4 +18,6 @@ GArray* array_get_reverted_key_candidates_from_special(ArrayContext *context, gc
 GArray* array_get_reverted_char_candidates_from_special(ArrayContext *context, gchar *keys);
 void array_release_candidates(GArray *candidates);
 
+gboolean array_input_key_is_not_special(ArrayContext* content, const gchar* keys, const gchar* ch);
+
 #endif

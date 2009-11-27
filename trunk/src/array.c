@@ -204,3 +204,38 @@ GArray* array_get_reverted_char_candidates_from_special(ArrayContext *context, g
 
     return result;
 }
+
+gboolean 
+array_input_key_is_not_special(ArrayContext* context, 
+                                const gchar* keys, const gchar* ch)
+{
+    sqlite3_stmt *stmt;
+
+    int retcode;
+    gboolean result = FALSE;
+    gchar *special_keys = NULL;
+
+    retcode = sqlite3_prepare_v2(context->conn, 
+            "SELECT keys FROM special WHERE ch=?", -1, &stmt, NULL);
+
+    if (retcode == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, ch, -1, SQLITE_TRANSIENT);
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
+            special_keys = g_strdup(ch);
+        }
+    }
+    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
+
+    if (special_keys == NULL)
+        return FALSE;
+
+    if (g_strcmp0(special_keys, keys) != 0) {
+        result = TRUE;
+    }
+
+    g_free(special_keys);
+
+    return result;
+}
