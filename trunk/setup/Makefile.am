@@ -18,13 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-setup_hangul_PYTHON = \
+setup_array_PYTHON = \
 	main.py \
 	$(NULL)
 
-nodist_setup_hangul_PYTHON = config.py
+nodist_setup_array_PYTHON = config.py
 
-setup_hanguldir = $(datadir)/ibus-array/setup
+setup_arraydir = $(datadir)/ibus-array/setup
 
 libexec_SCRIPTS = ibus-setup-array
 
