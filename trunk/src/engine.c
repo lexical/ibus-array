@@ -79,8 +79,17 @@ static void ibus_array_engine_show_special_code_for_char(IBusArrayEngine *arraye
 static void ibus_config_value_changed (IBusConfig *config, 
                                         const gchar *section, 
                                         const gchar *name, 
+#if IBUS_CHECK_VERSION(1,3,99)
+                                        GVariant *value,
+#else
                                         GValue *value, 
+#endif /* !IBUS_CHECK_VERSION(1,3,99) */
                                         gpointer user_data);
+
+static gboolean config_get_string     (IBusConfig *config,
+                                       const gchar *section,
+                                       const gchar *name,
+                                       gchar **result);
 
 static IBusEngineClass *parent_class = NULL;
 static IBusConfig *config = NULL;
@@ -120,7 +129,7 @@ void
 ibus_array_init (IBusBus *bus) 
 {
     gboolean res;
-    GValue value = { 0, };
+    gchar *str;
 
     array_context = array_create_context();
 
@@ -129,20 +138,19 @@ ibus_array_init (IBusBus *bus)
     is_special_notify = FALSE;
     is_special_only = FALSE;
 
-    res = ibus_config_get_value (config, "engine/Array", 
-                                "SpecialNotify", &value);
+    str = NULL;
+    res = config_get_string (config, "engine/Array", "SpecialNotify", &str);
     if (res) {
-        const gchar* str = g_value_get_string(&value);
         if (g_strcmp0(str, "1") == 0)
             is_special_notify = TRUE;
+        g_free (str);
     }
 
-    res = ibus_config_get_value (config, "engine/Array", 
-                                "SpecialOnly", &value);
+    res = config_get_string (config, "engine/Array", "SpecialOnly", &str);
     if (res) {
-        const gchar* str = g_value_get_string(&value);
         if (g_strcmp0(str, "1") == 0)
             is_special_only = TRUE;
+        g_free (str);
     }
 }
 
@@ -757,17 +765,59 @@ static void ibus_array_engine_property_activate  (IBusEngine *engine,
     }
 }
 
+static gboolean
+config_get_string (IBusConfig  *config,
+                   const gchar *section,
+                   const gchar *name,
+                   gchar      **result)
+{
+#if IBUS_CHECK_VERSION(1,3,99)
+    GVariant *value = NULL;
+
+    g_return_val_if_fail (result != NULL, FALSE);
+
+    value = ibus_config_get_value (config, section, name);
+    if (value) {
+        *result = g_strdup (g_variant_get_string (value, NULL));
+        g_variant_unref (value);
+        return TRUE;
+    }
+    return FALSE;
+#else
+    GValue value = { 0 };
+
+    g_return_val_if_fail (result != NULL, FALSE);
+
+    if (ibus_config_get_value (config, section, name, &value)) {
+        *result = g_strdup (g_value_get_string (&value));
+        g_value_unset (&value);
+        return TRUE;
+    }
+    return FALSE;
+#endif  /* !IBUS_CHECK_VERSION(1,3,99) */
+}
+
+#if IBUS_CHECK_VERSION(1,3,99)
+#define _g_variant_get_string g_variant_get_string
+#else
+#define _g_variant_get_string(value, length) g_value_get_string(value)
+#endif  /* !IBUS_CHECK_VERSION(1,3,99) */
+
 static void ibus_config_value_changed (IBusConfig *config, 
                                         const gchar *section, 
                                         const gchar *name, 
+#if IBUS_CHECK_VERSION(1,3,99)
+                                        GVariant *value,
+#else
                                         GValue *value, 
+#endif /* !IBUS_CHECK_VERSION(1,3,99) */
                                         gpointer user_data)
 {
     IBusArrayEngine *arrayeng = (IBusArrayEngine*)user_data;
 
     if (g_strcmp0(section, "engine/Array") == 0) {
         if (g_strcmp0(name, "SpecialNotify") == 0) {
-            const gchar* str = g_value_get_string(value);
+            const gchar* str = _g_variant_get_string(value, NULL);
             if (g_strcmp0(str, "1") == 0) {
                 is_special_notify = TRUE;
             }
@@ -776,7 +826,7 @@ static void ibus_config_value_changed (IBusConfig *config,
             }
         }
         else if (g_strcmp0(name, "SpecialOnly") == 0) {
-            const gchar* str = g_value_get_string(value);
+            const gchar* str = _g_variant_get_string(value, NULL);
             if (g_strcmp0(str, "1") == 0) {
                 is_special_only = TRUE;
             }
