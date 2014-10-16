@@ -151,8 +151,7 @@ ibus_array_exit (void)
 {
     array_release_context(array_context);    
 
-    if (g_object_is_floating(config))
-        g_object_unref(config);
+    g_object_unref(config);
     config = NULL;
 }
 
@@ -190,7 +189,6 @@ ibus_array_engine_init (IBusArrayEngine *arrayeng)
     arrayeng->space_press_count = 0;
 
     arrayeng->table = ibus_lookup_table_new (10, 0, FALSE, TRUE);
-    g_object_ref_sink(arrayeng->table);
     setup_label = ibus_text_new_from_string("Setup");
     setup_tooltip = ibus_text_new_from_string("Configure Array 30 engine");
     setup_prop = ibus_property_new("setup", 
@@ -199,12 +197,12 @@ ibus_array_engine_init (IBusArrayEngine *arrayeng)
                                     "gtk-preferences",
                                     setup_tooltip,
                                     TRUE, TRUE, 0, NULL);
-    g_object_ref_sink(setup_prop);
+    g_object_unref(setup_label);
+    g_object_unref(setup_tooltip);
 
     arrayeng->prop_list = ibus_prop_list_new();
-    g_object_ref_sink(arrayeng->prop_list);
-
     ibus_prop_list_append(arrayeng->prop_list, setup_prop);
+    g_object_unref(setup_prop);
 
     g_signal_connect (config, "value-changed",
             G_CALLBACK(ibus_config_value_changed), arrayeng);
@@ -338,8 +336,7 @@ ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng)
                                      text,
                                      array_preedit->len, //arrayeng->cursor_pos,
                                      TRUE);
-    if (G_IS_OBJECT(text) && g_object_is_floating(text))
-        g_object_unref(text);
+    g_object_unref (text);
 
     g_string_free(array_preedit, TRUE);
 }
@@ -433,8 +430,7 @@ ibus_array_engine_commit_string (IBusArrayEngine *arrayeng,
     IBusText *text;
     text = ibus_text_new_from_static_string (string);
     ibus_engine_commit_text ((IBusEngine *)arrayeng, text);
-    if (g_object_is_floating(text))
-        g_object_unref(text);
+    g_object_unref (text);
 }
 
 static void
@@ -550,6 +546,9 @@ ibus_array_engine_process_key_event (IBusEngine *engine,
         return ibus_array_engine_process_candidate_key_event(arrayeng, keyval, modifiers);
     }
 
+    if (arrayeng->preedit->len >= 5) {
+        return TRUE;
+    }
 
     if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon) {
 
@@ -565,9 +564,6 @@ ibus_array_engine_process_key_event (IBusEngine *engine,
                     ibus_array_engine_reset((IBusEngine*)arrayeng);*/
             }
         }
-	if (arrayeng->preedit->len >= 5) {
-	    return TRUE;
-	}
 
         g_string_insert_c (arrayeng->preedit,
                            arrayeng->cursor_pos,
@@ -673,8 +669,7 @@ ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, gchar* aux_st
     if (aux_string) {
         text = ibus_text_new_from_string(aux_string);
         ibus_engine_update_auxiliary_text((IBusEngine*)arrayeng, text, TRUE);
-        if (g_object_is_floating(text))
-            g_object_unref(text);
+        g_object_unref(text);
     }
 }
 
