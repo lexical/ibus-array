@@ -558,10 +558,6 @@ ibus_array_engine_process_key_event (IBusEngine *engine,
         return ibus_array_engine_process_candidate_key_event(arrayeng, keyval, modifiers);
     }
 
-    if (arrayeng->preedit->len >= 5) {
-        return TRUE;
-    }
-
     if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon) {
 
         if (arrayeng->space_press_count == 1) {
@@ -574,7 +570,13 @@ ibus_array_engine_process_key_event (IBusEngine *engine,
 
                 /*if (commit_rev)
                     ibus_array_engine_reset((IBusEngine*)arrayeng);*/
+            } else {
+		ibus_array_engine_reset((IBusEngine*)arrayeng);
             }
+        }
+
+        if (arrayeng->preedit->len >= 5) {
+                return TRUE;
         }
 
         g_string_insert_c (arrayeng->preedit,
