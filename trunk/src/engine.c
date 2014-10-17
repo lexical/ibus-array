@@ -82,6 +82,7 @@ static IBusEngineClass *parent_class = NULL;
 static IBusConfig *config = NULL;
 static gboolean is_special_notify;
 static gboolean is_special_only;
+static gboolean is_aux_shown = FALSE;
 
 static ArrayContext *array_context = NULL;
 
@@ -439,12 +440,15 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
     IBusArrayEngine *arrayeng = (IBusArrayEngine *)engine;
 
     if (g_strcmp0(arrayeng->preedit->str, "w") == 0)
+    {
         ibus_array_engine_update_auxiliary_text(arrayeng, "1.標點 2.括弧 3.符號 4.數學 5.方向 6.單位 7.圖表 8.羅馬 9.希臘 0.注音");
-    else
+        is_aux_shown = TRUE;
+    }
+    else if (is_aux_shown)
     {
         ibus_array_engine_update_auxiliary_text(arrayeng, "");
         ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
-
+        is_aux_shown = FALSE;
     }
 
     if (modifiers & IBUS_RELEASE_MASK)
