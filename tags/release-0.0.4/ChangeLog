@@ -1,0 +1,17 @@
+Version 0.0.4
+	* Update the tables supporting Unicode 5.3
+	* show hints in the aux window when pressing 'w'
+
+Version 0.0.3
+	* ibus 1.4 support
+	* Fix mess when inputing a wrong root sequence
+	* remove embedded sqlite dependency
+
+Version 0.0.2
+	* Special code notification
+	* Special code only mode
+	* Python setup GUI
+
+Version 0.0.1
+	* First release
+	* Implement the basic functions of Array 30
