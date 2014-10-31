@@ -49,12 +49,12 @@ class Setup:
         self.__special_only_button = Gtk.CheckButton("Speical Code Only Mode")
         self.__window.vbox.pack_start(self.__special_only_button, True, True ,10)
 
-        current_special_mode = self.__read("SpecialOnly", "0")
-        current_special_notify = self.__read("SpecialNotify", "0")
+        current_special_mode = self.__read("SpecialOnly", False)
+        current_special_notify = self.__read("SpecialNotify", False)
 
-        if current_special_notify == "1":
+        if current_special_notify:
             self.__special_notify_button.set_active(True)
-        if current_special_mode == "1":
+        if current_special_mode:
             self.__special_only_button.set_active(True)
 
         self.__window.show_all()
@@ -70,23 +70,25 @@ class Setup:
         select_special_mode = self.__special_only_button.get_active()
 
         if select_special_notify:
-            self.__write("SpecialNotify", GLib.Variant.new_string("1"))
+            self.__write("SpecialNotify", GLib.Variant.new_boolean(True))
         else:
-            self.__write("SpecialNotify", GLib.Variant.new_string("0"))
+            self.__write("SpecialNotify", GLib.Variant.new_boolean(False))
+
         if select_special_mode:
-            self.__write("SpecialOnly", GLib.Variant.new_string("1"))
+            self.__write("SpecialOnly", GLib.Variant.new_boolean(True))
         else:
-            self.__write("SpecialOnly", GLib.Variant.new_string("0"))
+            self.__write("SpecialOnly", GLib.Variant.new_boolean(False))
 
     def on_value_changed(self, config, section, name, value, data):
         if section == 'engine/Array':
             if name == 'SpecialNotify':
-                if value == '1':
+                if value:
                     self.__special_notify_button.set_active(True)
                 else:
                     self.__special_notify_button.set_active(False)
+
             elif name == 'SpecialOnly':
-                if value == '1':
+                if value:
                     self.__special_notify_button.set_active(True)
                 else:
                     self.__special_notify_button.set_active(False)
