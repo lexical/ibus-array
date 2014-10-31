@@ -616,9 +616,6 @@ static void ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, g
     {
         text = ibus_text_new_from_string(aux_string);
         ibus_engine_update_auxiliary_text((IBusEngine*)arrayeng, text, TRUE);
-
-    if (g_object_is_floating (text))
-        g_object_unref (text);
     }
 }
 
