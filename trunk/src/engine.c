@@ -68,15 +68,7 @@ static void ibus_array_engine_update_auxiliary_text (IBusArrayEngine *arrayeng, 
 static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng);
 static void ibus_array_engine_show_special_code_for_char(IBusArrayEngine *arrayeng, gchar *ch);
 
-static void ibus_config_value_changed (IBusConfig *config, const gchar *section, const gchar *name, 
-#if IBUS_CHECK_VERSION(1,3,99)
-                                        GVariant *value,
-#else
-                                        GValue *value, 
-#endif /* !IBUS_CHECK_VERSION(1,3,99) */
-                                        gpointer user_data);
-
-static gboolean config_get_string (IBusConfig *config, const gchar *section, const gchar *name, gchar **result);
+static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *section, const gchar *name, GVariant *value, gpointer unused);
 
 static IBusEngineClass *parent_class = NULL;
 static IBusConfig *config = NULL;
@@ -86,8 +78,7 @@ static gboolean is_aux_shown = FALSE;
 
 static ArrayContext *array_context = NULL;
 
-GType
-ibus_array_engine_get_type (void)
+GType ibus_array_engine_get_type (void)
 {
 	static GType type = 0;
 
@@ -123,22 +114,16 @@ void ibus_array_init (IBusBus *bus)
     is_special_notify = FALSE;
     is_special_only = FALSE;
 
-    str = NULL;
-    res = config_get_string (config, "engine/Array", "SpecialNotify", &str);
-    if (res)
-    {
-        if (g_strcmp0(str, "1") == 0)
-            is_special_notify = TRUE;
-        g_free (str);
-    }
+    /* load config */
+    GVariant* value;
 
-    res = config_get_string (config, "engine/Array", "SpecialOnly", &str);
-    if (res)
-    {
-        if (g_strcmp0(str, "1") == 0)
-            is_special_only = TRUE;
-        g_free (str);
-    }
+    value = ibus_config_get_value (config, "engine/Array", "SpecialNotify");
+    if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
+        is_special_notify = g_variant_get_boolean(value);
+
+    value = ibus_config_get_value (config, "engine/Array", "SpecialOnly");
+    if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
+            is_special_only = g_variant_get_boolean(value);
 }
 
 void ibus_array_exit (void) 
@@ -147,7 +132,6 @@ void ibus_array_exit (void)
 
     if (g_object_is_floating (config))
         g_object_unref(config);
-    config = NULL;
 }
 
 static void ibus_array_engine_class_init (IBusArrayEngineClass *klass)
@@ -193,7 +177,7 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
 
     ibus_prop_list_append(arrayeng->prop_list, setup_prop);
 
-    g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed), arrayeng);
+    g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed_cb), arrayeng);
 }
 
 static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng)
@@ -717,70 +701,23 @@ static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar
     }
 }
 
-static gboolean config_get_string (IBusConfig  *config, const gchar *section, const gchar *name, gchar **result)
+static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *section,  const gchar *name, GVariant *value, gpointer unused)
 {
-#if IBUS_CHECK_VERSION(1,3,99)
-    GVariant *value = NULL;
-
-    g_return_val_if_fail (result != NULL, FALSE);
-
-    value = ibus_config_get_value (config, section, name);
-    if (value)
-    {
-        *result = g_strdup (g_variant_get_string (value, NULL));
-        g_variant_unref (value);
-        return TRUE;
-    }
-    return FALSE;
-#else
-    GValue value = { 0 };
-
-    g_return_val_if_fail (result != NULL, FALSE);
-
-    if (ibus_config_get_value (config, section, name, &value)) {
-        *result = g_strdup (g_value_get_string (&value));
-        g_value_unset (&value);
-        return TRUE;
-    }
-    return FALSE;
-#endif  /* !IBUS_CHECK_VERSION(1,3,99) */
-}
-
-#if IBUS_CHECK_VERSION(1,3,99)
-#define _g_variant_get_string g_variant_get_string
-#else
-#define _g_variant_get_string(value, length) g_value_get_string(value)
-#endif  /* !IBUS_CHECK_VERSION(1,3,99) */
-
-static void ibus_config_value_changed (IBusConfig *config, const gchar *section,  const gchar *name, 
-#if IBUS_CHECK_VERSION(1,3,99)
-                                        GVariant *value,
-#else
-                                        GValue *value, 
-#endif /* !IBUS_CHECK_VERSION(1,3,99) */
-                                        gpointer user_data)
-{
-    IBusArrayEngine *arrayeng = (IBusArrayEngine*)user_data;
-
     if (g_strcmp0(section, "engine/Array") == 0)
     {
-        if (g_strcmp0(name, "SpecialNotify") == 0) {
-            const gchar* str = _g_variant_get_string(value, NULL);
-            if (g_strcmp0(str, "1") == 0) {
+        if (g_strcmp0(name, "SpecialNotify") == 0)
+        {
+            if (g_variant_get_boolean (value)) 
                 is_special_notify = TRUE;
-            }
-            else {
+            else
                 is_special_notify = FALSE;
-            }
         }
-        else if (g_strcmp0(name, "SpecialOnly") == 0) {
-            const gchar* str = _g_variant_get_string(value, NULL);
-            if (g_strcmp0(str, "1") == 0) {
+        else if (g_strcmp0(name, "SpecialOnly") == 0)
+        {
+            if (g_variant_get_boolean (value))
                 is_special_only = TRUE;
-            }
-            else {
+            else
                 is_special_only = FALSE;
-            }
         }
     }
 }
