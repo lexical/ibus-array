@@ -40,4 +40,4 @@ msgstr "當有特別碼時，顯示提示"
 
 #: setup/main.py:52
 msgid "Speical Code Only Mode"
-msgstr "當有特別碼時，只能用特別碼輸入 (特別碼練習模試)"
+msgstr "當有特別碼時，只能用特別碼輸入 (特別碼練習模式)"
