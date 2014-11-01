@@ -256,8 +256,10 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
         candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
     
     if (candidates == NULL)
+    {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return;
+    }
     else if (candidates->len == 0)
     {
         array_release_candidates(candidates);
