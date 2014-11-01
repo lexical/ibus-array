@@ -110,6 +110,8 @@ void ibus_array_init (IBusBus *bus)
     array_context = array_create_context();
 
     config = ibus_bus_get_config (bus);
+    if (config)
+        g_object_ref_sink (config);
 
     is_special_notify = FALSE;
     is_special_only = FALSE;
@@ -177,7 +179,7 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
 
     ibus_prop_list_append(arrayeng->prop_list, setup_prop);
 
-    g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed_cb), arrayeng);
+    g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed_cb), NULL);
 }
 
 static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng)
@@ -700,21 +702,9 @@ static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar
 
 static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *section,  const gchar *name, GVariant *value, gpointer unused)
 {
-    if (g_strcmp0(section, "engine/Array") == 0)
-    {
-        if (g_strcmp0(name, "SpecialNotify") == 0)
-        {
-            if (g_variant_get_boolean (value)) 
-                is_special_notify = TRUE;
-            else
-                is_special_notify = FALSE;
-        }
-        else if (g_strcmp0(name, "SpecialOnly") == 0)
-        {
-            if (g_variant_get_boolean (value))
-                is_special_only = TRUE;
-            else
-                is_special_only = FALSE;
-        }
-    }
+    if (g_strcmp0(section, "engine/array") == 0)
+        if (g_strcmp0(name, "specialnotify") == 0)
+            is_special_notify = g_variant_get_boolean (value);
+        else if (g_strcmp0(name, "specialonly") == 0)
+            is_special_only = g_variant_get_boolean (value);
 }
