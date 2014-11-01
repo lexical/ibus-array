@@ -1,8 +1,12 @@
 /* vim:set et sts=4: */
 
+#include <locale.h>
+#include <libintl.h>
 #include "engine.h"
 #include "array.h"
+#include "config.h"
 
+#define _(String) gettext(String)
 #define ARRAY_SHORT_CODE_EMPTY_STRING "⎔"
 
 typedef struct _IBusArrayEngine IBusArrayEngine;
@@ -124,6 +128,11 @@ void ibus_array_init (IBusBus *bus)
     value = ibus_config_get_value (config, "engine/Array", "SpecialOnly");
     if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
             is_special_only = g_variant_get_boolean(value);
+
+    /* gettext preparation */
+    setlocale (LC_ALL, "");
+    bindtextdomain (PACKAGE, LOCALEDIR);
+    textdomain (PACKAGE);
 }
 
 void ibus_array_exit (void) 
@@ -167,8 +176,8 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
 
     arrayeng->table = ibus_lookup_table_new (10, 0, FALSE, TRUE);
     g_object_ref_sink (arrayeng->table);
-    setup_label = ibus_text_new_from_string("Setup");
-    setup_tooltip = ibus_text_new_from_string("Configure Array 30 engine");
+    setup_label = ibus_text_new_from_string (_("Setup"));
+    setup_tooltip = ibus_text_new_from_string (_("Configure Array 30 engine"));
     setup_prop = ibus_property_new("setup", PROP_TYPE_NORMAL, setup_label, "gtk-preferences", setup_tooltip, TRUE, TRUE, 0, NULL);
     g_object_ref_sink (setup_prop);
 
@@ -410,7 +419,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 
     if (g_strcmp0(arrayeng->preedit->str, "w") == 0)
     {
-        ibus_array_engine_update_auxiliary_text(arrayeng, "1.標點 2.括弧 3.符號 4.數學 5.方向 6.單位 7.圖表 8.羅馬 9.希臘 0.注音");
+        ibus_array_engine_update_auxiliary_text(arrayeng, _("1.comma 2.bracket 3.symbol 4.math 5.arrow 6.unit 7.table 8.roman 9.greek 0.bopomo"));
         is_aux_shown = TRUE;
     }
     else if (is_aux_shown)

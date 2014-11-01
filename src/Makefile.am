@@ -25,18 +25,20 @@ ibus_engine_array_SOURCES = \
 	main.c \
 	engine.c \
 	engine.h \
-    array.c \
-    array.h \
+	array.c \
+	array.h \
 	$(NULL)
 ibus_engine_array_CFLAGS = \
 	@IBUS_CFLAGS@ \
 	@SQLITE3_CFLAGS@ \
+	-DLOCALEDIR=\"$(localedir)\" \
 	-DPKGDATADIR=\"$(pkgdatadir)\" \
-    -DLIBEXECDIR=\"$(libexecdir)\" \
+	-DLIBEXECDIR=\"$(libexecdir)\" \
 	$(NULL)
 ibus_engine_array_LDFLAGS = \
 	@IBUS_LIBS@ \
 	@SQLITE3_LIBS@ \
+	@LIBINTL@ \
 	$(NULL)
 
 component_DATA = \

@@ -20,9 +20,9 @@
 
 SUBDIRS = \
 	src \
-    setup \
+	setup \
 	icons \
-    data \
+	data \
 	m4 \
 	po \
 	$(NULL)
