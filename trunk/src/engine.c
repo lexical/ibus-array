@@ -8,7 +8,8 @@
 typedef struct _IBusArrayEngine IBusArrayEngine;
 typedef struct _IBusArrayEngineClass IBusArrayEngineClass;
 
-struct _IBusArrayEngine {
+struct _IBusArrayEngine
+{
     IBusEngine parent;
 
     /* members */
@@ -20,7 +21,8 @@ struct _IBusArrayEngine {
     IBusPropList *prop_list;
 };
 
-struct _IBusArrayEngineClass {
+struct _IBusArrayEngineClass
+{
     IBusEngineClass parent;
 };
 
@@ -75,7 +77,6 @@ static IBusConfig *config = NULL;
 static gboolean is_special_notify;
 static gboolean is_special_only;
 static gboolean is_aux_shown = FALSE;
-
 static ArrayContext *array_context = NULL;
 
 GType ibus_array_engine_get_type (void)
@@ -95,9 +96,7 @@ GType ibus_array_engine_get_type (void)
 	};
 
 	if (type == 0)
-        {
 		type = g_type_register_static (IBUS_TYPE_ENGINE, "IBusArrayEngine", &type_info, (GTypeFlags) 0);
-	}
 
 	return type;
 }
@@ -105,7 +104,6 @@ GType ibus_array_engine_get_type (void)
 void ibus_array_init (IBusBus *bus) 
 {
     gboolean res;
-    gchar *str;
 
     array_context = array_create_context();
 
@@ -188,6 +186,7 @@ static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng)
         g_object_unref(arrayeng->prop_list);
         arrayeng->prop_list = NULL;
     }
+
     if (arrayeng->preedit) {
         g_string_free (arrayeng->preedit, TRUE);
         arrayeng->preedit = NULL;
@@ -207,10 +206,10 @@ static void ibus_array_engine_reset(IBusEngine *engine)
     g_string_assign (arrayeng->preedit, "");
     arrayeng->cursor_pos = 0;
     arrayeng->space_press_count = 0;
+
     ibus_array_engine_update_preedit (arrayeng);
     ibus_engine_hide_lookup_table (engine);
     ibus_engine_hide_auxiliary_text (engine);
-
     parent_class->reset(engine);
 }
 
@@ -227,9 +226,7 @@ static void ibus_array_engine_page_down (IBusEngine *engine)
 static void ibus_array_engine_focus_in (IBusEngine *engine)
 {
     IBusArrayEngine *arrayeng = (IBusArrayEngine*)engine;
-
     ibus_engine_register_properties (engine, arrayeng->prop_list);
-
     parent_class->focus_in (engine);
 }
 
@@ -254,19 +251,13 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
     GArray *candidates = NULL;
 
     if (arrayeng->preedit->len <= 2 && arrayeng->space_press_count == 0)
-    {
         candidates = array_get_candidates_from_short(array_context, arrayeng->preedit->str);
-    }
     else
-    {
         candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
-    }
     
     if (candidates == NULL)
-    {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return;
-    }
     else if (candidates->len == 0)
     {
         array_release_candidates(candidates);
@@ -275,9 +266,7 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
     }
 
     for (i = 0; i < candidates->len; i++)
-    {
         ibus_lookup_table_append_candidate (arrayeng->table, ibus_text_new_from_string (g_array_index(candidates, gchar*, i)));
-    }
 
     array_release_candidates(candidates);
 
@@ -302,13 +291,11 @@ static void ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng)
     {
         retval = 0;
         if (retval != 0)
-        {
-            ibus_attr_list_append (text->attrs,
-                               ibus_attr_foreground_new (0xff0000, 0, array_preedit->len));
-        }
+            ibus_attr_list_append (text->attrs, ibus_attr_foreground_new (0xff0000, 0, array_preedit->len));
     }
     
     ibus_engine_update_preedit_text ((IBusEngine *)arrayeng, text, array_preedit->len, TRUE);
+
     if (G_IS_OBJECT (text) && g_object_is_floating (text))
     	g_object_unref (text);
 
@@ -345,9 +332,7 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
     }
 
     for (i = 0; i < candidates->len; i++)
-    {
         ibus_lookup_table_append_candidate (arrayeng->table, ibus_text_new_from_string (g_array_index(candidates, gchar*, i)));
-    }
 
     array_release_candidates(candidates);
 
@@ -375,12 +360,10 @@ static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arr
             if (check_special)
             {
                 if (is_special_notify)
-                {
                     ibus_array_engine_show_special_code_for_char (arrayeng, text->text);
-                }
-                if (is_special_only) {
+
+                if (is_special_only)
                     return FALSE;
-                }
             }
         }
         ibus_engine_commit_text((IBusEngine*)arrayeng, text);
@@ -388,9 +371,7 @@ static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arr
         ibus_array_engine_reset((IBusEngine*)arrayeng);
 
         if (is_special_notify && check_special)
-        {
             ibus_array_engine_show_special_code_for_char(arrayeng, temptext);
-        }
 
         g_free(temptext);
 
@@ -447,12 +428,14 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         return FALSE;
 
 
-    switch (keyval) {
+    switch (keyval)
+    {
     case IBUS_space:
         if (arrayeng->preedit->len == 0)
             return FALSE;
         ibus_array_engine_space_press(arrayeng);
         return TRUE;
+
     case IBUS_Return:
         if (arrayeng->preedit->len == 0)
             return FALSE;
@@ -510,7 +493,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 
     if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon)
     {
-        if (arrayeng->space_press_count == 1) {
+        if (arrayeng->space_press_count == 1)
             if (arrayeng->table->candidates->len > 0)
             {
                 gboolean commit_rev;
@@ -521,12 +504,9 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
             } else {
 		ibus_array_engine_reset((IBusEngine*)arrayeng);
             }
-        }
 
         if (arrayeng->preedit->len >= 5)
-        {
                 return TRUE;
-        }
 
         g_string_insert_c (arrayeng->preedit, arrayeng->cursor_pos, keyval);
 
@@ -598,15 +578,11 @@ static void ibus_array_engine_space_press (IBusArrayEngine *arrayeng)
 
         if (arrayeng->table->candidates->len > 0)
         {
-
             ibus_lookup_table_set_cursor_pos (arrayeng->table, 0);
-
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
         }
         else
-        {
             ibus_array_engine_reset((IBusEngine*)arrayeng);
-        }
     }
 }
 
@@ -644,9 +620,8 @@ static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
         g_string_free(keystr, TRUE);
         g_free(show_str);
     }
-    else {
+    else
         ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
-    }
 
     array_release_candidates(candidates);
 }
@@ -671,9 +646,7 @@ static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *array
         g_free(show_str);
     }
     else
-    {
         ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
-    }
 
     array_release_candidates(candidates);
 }
@@ -708,3 +681,4 @@ static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *secti
         else if (g_strcmp0(name, "specialonly") == 0)
             is_special_only = g_variant_get_boolean (value);
 }
+
