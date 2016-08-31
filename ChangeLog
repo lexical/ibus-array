@@ -1,3 +1,10 @@
+Version 0.1.1
+	* Add the copyright information
+	* Add the maintainer information
+
+Version 0.1.0
+	* Refactored and removed unnecessary code.
+
 Version 0.0.4
 	* Update the tables supporting Unicode 5.3
 	* show hints in the aux window when pressing 'w'
