@@ -3,32 +3,34 @@
 
 from pysqlite2 import dbapi2 as sqlite
 
-def array_updatedb(table_file):
+def array_updatedb(table_file, table):
 	con = sqlite.connect("array.db")
 	cur = con.cursor()
-	cur.execute('select * from main')
-	main = cur.fetchall()
+	cur.execute('select * from ' + table)
+	tbl = cur.fetchall()
 
 	# read from the text table
 	f = open(table_file, 'r')
-	z = map(lambda x:x.split('\t'), f.readlines())
-	k = map(lambda y:(y[0].lower(), y[1].strip()), z)
+	z = map(lambda x:x.split('\t'), filter(lambda k:(k[0] != '#' and k[0] != '%' and len(k.strip()) != 0), f.readlines()))
+	k = map(lambda y:(y[0].lower(), y[1].strip(' \n')), z)
 	f.close()
 
 	# update the database
 	for i, j in k:
-		cur.execute('insert into main (keys, ch) values ("' + i + '", "' + j + '");')
+		cur.execute('INSERT INTO ' + table + ' (keys, ch) VALUES ("' + i + '", "' + j + '");')
 
 	con.commit()
 	con.close()
 
-# empty main table
+# empty tables
 con = sqlite.connect("array.db")
 cur = con.cursor()
-cur.execute('delete from main where keys not in ("w1", "w2", "w3", "w4", "w5", "w6", "w7", "w8", "w9", "w0");')
+cur.execute('DELETE FROM main;')
+cur.execute('DELETE FROM short;')
+cur.execute('DELETE FROM special;')
 con.commit()
 con.close()
 
-array_updatedb('array30_27489.utf8')
-array_updatedb('array30_ExtB.utf8')
-array_updatedb('array30_ExtCD_V2012A.utf8')
+array_updatedb('array-special.cin', 'special')
+array_updatedb('array-shortcode.cin', 'short')
+array_updatedb('array30.cin', 'main')
