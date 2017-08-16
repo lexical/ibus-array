@@ -104,4 +104,5 @@ int main(gint argc, gchar **argv)
     ibus_main ();
 
     ibus_array_exit();
+    return(0);
 }
