@@ -340,7 +340,7 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
     if (arrayeng->preedit->len == 0)
     {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
-        return;
+        return FALSE;
     }
 
     ibus_lookup_table_clear (arrayeng->table);
@@ -352,13 +352,13 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
     if (candidates == NULL)
     {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
-        return;
+        return FALSE;
     }
     else if (candidates->len == 0)
     {
         array_release_candidates(candidates);
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
-        return;
+        return FALSE;
     }
 
     for (i = 0; i < candidates->len; i++)
@@ -367,6 +367,7 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
     array_release_candidates(candidates);
 
     ibus_engine_update_lookup_table ((IBusEngine *) arrayeng, arrayeng->table, TRUE);
+    return TRUE;
 }
 
 static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arrayeng) {
