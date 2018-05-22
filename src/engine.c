@@ -267,7 +267,7 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng) {
     GArray *candidates = NULL;
 
     if (arrayeng->preedit->len <= 2 && arrayeng->space_press_count == 0)
-        candidates = array_get_candidates_from_short(array_context, arrayeng->preedit->str);
+        candidates = array_get_candidates_from_simple(array_context, arrayeng->preedit->str);
     else
         candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
     

@@ -26,5 +26,6 @@ from sys import argv
 con = sqlite.connect(argv[1])
 cur = con.cursor()
 cur.execute('DELETE FROM main;')
+cur.execute('DELETE FROM simple;')
 con.commit()
 con.close()

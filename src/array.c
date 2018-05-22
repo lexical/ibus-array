@@ -138,14 +138,14 @@ GArray* array_get_candidates_from_main(ArrayContext *context, gchar *keys) {
     return result;
 }
 
-GArray* array_get_candidates_from_short(ArrayContext *context, gchar *keys) {
+GArray* array_get_candidates_from_simple(ArrayContext *context, gchar *keys) {
     GArray *result;
     result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
 
     sqlite3_stmt *stmt;
 
     int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM short WHERE keys=?", -1, &stmt, NULL);
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM simple WHERE keys=?", -1, &stmt, NULL);
     if (retcode == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
         while (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -167,7 +167,7 @@ GArray* array_get_candidates_from_special(ArrayContext *context, gchar *keys) {
     sqlite3_stmt *stmt;
 
     int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM special WHERE keys=?", -1, &stmt, NULL);
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE cat='2' AND keys=?", -1, &stmt, NULL);
     if (retcode == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
         while (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -189,7 +189,7 @@ GArray* array_get_reverted_key_candidates_from_special(ArrayContext *context, gc
     sqlite3_stmt *stmt;
 
     int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT keys FROM special WHERE ch=?", -1, &stmt, NULL);
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT keys FROM main WHERE cat='2' AND ch=?", -1, &stmt, NULL);
     if (retcode == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, ch, -1, SQLITE_TRANSIENT);
         while (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -211,7 +211,7 @@ GArray* array_get_reverted_char_candidates_from_special(ArrayContext *context, g
     sqlite3_stmt *stmt;
 
     int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM special WHERE keys=?", -1, &stmt, NULL);
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE cat='2' AND keys=?", -1, &stmt, NULL);
     if (retcode == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
         while (sqlite3_step(stmt) == SQLITE_ROW) {

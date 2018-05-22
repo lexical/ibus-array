@@ -28,7 +28,7 @@ REGION_UNIFIED_ExtB  = 3
 REGION_UNIFIED_ExtCD = 4
 REGION_UNIFIED_ExtE  = 5
 REGION_UNIFIED_ExtF  = 6
-REGION_ARRAY_SIMPLE  = 7
+REGION_ARRAY_SYMBOL  = 7
 
 STR_UNIFIED_ExtA  = "CJK Unified Ideographs + Extension A"
 STR_ARRAY_SPECIAL = "Array30 Special Code"
@@ -36,7 +36,7 @@ STR_UNIFIED_ExtB  = "CJK Unified Ideographs Extension B"
 STR_UNIFIED_ExtCD = "CJK Unified Ideographs Extension C & D"
 STR_UNIFIED_ExtE  = "CJK Unified Ideographs Extension E"
 STR_UNIFIED_ExtF  = "CJK Unified Ideographs Extension F"
-STR_ARRAY_SIMPLE  = "CJK Symbols & Punctuation for Array30 input method (w+0~9)"
+STR_ARRAY_SYMBOL  = "CJK Symbols & Punctuation for Array30 input method (w+0~9)"
 
 REG_STACK = []
 
