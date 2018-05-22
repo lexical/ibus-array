@@ -1,7 +1,7 @@
 /*
  ibus-array - The Array 30 Engine for IBus
 
- Copyright (c) 2009-2014 Yu-Chun Wang <mainlander1122@gmail.com>
+ Copyright (c) 2009-2018 Yu-Chun Wang <mainlander1122@gmail.com>
                          Keng-Yu Lin <kengyu@lexical.tw>
 
  This program is free software; you can redistribute it and/or modify
@@ -31,8 +31,7 @@
 typedef struct _IBusArrayEngine IBusArrayEngine;
 typedef struct _IBusArrayEngineClass IBusArrayEngineClass;
 
-struct _IBusArrayEngine
-{
+struct _IBusArrayEngine {
     IBusEngine parent;
 
     /* members */
@@ -44,8 +43,7 @@ struct _IBusArrayEngine
     IBusPropList *prop_list;
 };
 
-struct _IBusArrayEngineClass
-{
+struct _IBusArrayEngineClass {
     IBusEngineClass parent;
 };
 
@@ -102,8 +100,7 @@ static gboolean is_special_only;
 static gboolean is_aux_shown = FALSE;
 static ArrayContext *array_context = NULL;
 
-GType ibus_array_engine_get_type (void)
-{
+GType ibus_array_engine_get_type (void) {
 	static GType type = 0;
 
 	static const GTypeInfo type_info = {
@@ -124,8 +121,7 @@ GType ibus_array_engine_get_type (void)
 	return type;
 }
 
-void ibus_array_init (IBusBus *bus) 
-{
+void ibus_array_init (IBusBus *bus) {
     gboolean res;
 
     array_context = array_create_context();
@@ -208,8 +204,7 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
     g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed_cb), NULL);
 }
 
-static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng)
-{
+static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng) {
     if (arrayeng->prop_list) {
         g_object_unref(arrayeng->prop_list);
         arrayeng->prop_list = NULL;
@@ -228,8 +223,7 @@ static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng)
 	IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)arrayeng);
 }
 
-static void ibus_array_engine_reset(IBusEngine *engine)
-{
+static void ibus_array_engine_reset(IBusEngine *engine) {
     IBusArrayEngine *arrayeng = (IBusArrayEngine*)engine;
     g_string_assign (arrayeng->preedit, "");
     arrayeng->cursor_pos = 0;
@@ -241,35 +235,29 @@ static void ibus_array_engine_reset(IBusEngine *engine)
     parent_class->reset(engine);
 }
 
-static void ibus_array_engine_page_up (IBusEngine *engine)
-{
+static void ibus_array_engine_page_up (IBusEngine *engine) {
     parent_class->page_up (engine);
 }
 
-static void ibus_array_engine_page_down (IBusEngine *engine)
-{
+static void ibus_array_engine_page_down (IBusEngine *engine) {
     parent_class->page_down (engine);
 }
 
-static void ibus_array_engine_focus_in (IBusEngine *engine)
-{
+static void ibus_array_engine_focus_in (IBusEngine *engine) {
     IBusArrayEngine *arrayeng = (IBusArrayEngine*)engine;
     ibus_engine_register_properties (engine, arrayeng->prop_list);
     parent_class->focus_in (engine);
 }
 
-static void ibus_array_engine_focus_out (IBusEngine *engine) 
-{
+static void ibus_array_engine_focus_out (IBusEngine *engine) {
     parent_class->focus_out (engine);
 }
 
-static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
-{
+static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng) {
     gint i;
     gboolean retval;
 
-    if (arrayeng->preedit->len == 0)
-    {
+    if (arrayeng->preedit->len == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return;
     }
@@ -283,13 +271,11 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
     else
         candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
     
-    if (candidates == NULL)
-    {
+    if (candidates == NULL) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return;
     }
-    else if (candidates->len == 0)
-    {
+    else if (candidates->len == 0) {
         array_release_candidates(candidates);
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return;
@@ -304,8 +290,7 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng)
 
 }
 
-static void ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng)
-{
+static void ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng) {
     IBusText *text;
     gint retval;
 
@@ -317,8 +302,7 @@ static void ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng)
 
     ibus_attr_list_append (text->attrs, ibus_attr_underline_new (IBUS_ATTR_UNDERLINE_SINGLE, 0, array_preedit->len));
 
-    if (array_preedit->len > 0)
-    {
+    if (array_preedit->len > 0) {
         retval = 0;
         if (retval != 0)
             ibus_attr_list_append (text->attrs, ibus_attr_foreground_new (0xff0000, 0, array_preedit->len));
@@ -337,8 +321,7 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
     gint i;
     gboolean retval;
 
-    if (arrayeng->preedit->len == 0)
-    {
+    if (arrayeng->preedit->len == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return FALSE;
     }
@@ -349,13 +332,11 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
 
     candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
     
-    if (candidates == NULL)
-    {
+    if (candidates == NULL) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return FALSE;
     }
-    else if (candidates->len == 0)
-    {
+    else if (candidates->len == 0) {
         array_release_candidates(candidates);
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
         return FALSE;
@@ -380,16 +361,13 @@ static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arr
     cursor_pos = ibus_lookup_table_get_cursor_pos (arrayeng->table);
     text = ibus_lookup_table_get_candidate(arrayeng->table, cursor_pos);
 
-    if (g_strcmp0(text->text, ARRAY_SHORT_CODE_EMPTY_STRING) != 0)
-    {
+    if (g_strcmp0(text->text, ARRAY_SHORT_CODE_EMPTY_STRING) != 0) {
         temptext = g_strdup(text->text);
 
-        if (is_special_only || is_special_notify)
-        {
+        if (is_special_only || is_special_notify) {
             check_special = array_input_key_is_not_special (array_context, arrayeng->preedit->str, text->text);
 
-            if (check_special)
-            {
+            if (check_special) {
                 if (is_special_notify)
                     ibus_array_engine_show_special_code_for_char (arrayeng, text->text);
 
@@ -414,8 +392,7 @@ static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arr
     return FALSE;
 }
 
-static void ibus_array_engine_commit_string (IBusArrayEngine *arrayeng, const gchar*string)
-{
+static void ibus_array_engine_commit_string (IBusArrayEngine *arrayeng, const gchar*string) {
     IBusText *text;
     text = ibus_text_new_from_static_string (string);
     ibus_engine_commit_text ((IBusEngine *)arrayeng, text);
@@ -423,8 +400,7 @@ static void ibus_array_engine_commit_string (IBusArrayEngine *arrayeng, const gc
     	g_object_unref (text);
 }
 
-static void ibus_array_engine_update (IBusArrayEngine *arrayeng)
-{
+static void ibus_array_engine_update (IBusArrayEngine *arrayeng) {
     ibus_array_engine_update_preedit (arrayeng);
     ibus_array_engine_update_lookup_table(arrayeng);
     ibus_array_engine_show_special_code(arrayeng);
@@ -432,18 +408,15 @@ static void ibus_array_engine_update (IBusArrayEngine *arrayeng)
 
 #define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z))
 
-static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint keyval, guint keycode, guint modifiers)
-{
+static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint keyval, guint keycode, guint modifiers) {
     IBusText *text;
     IBusArrayEngine *arrayeng = (IBusArrayEngine *)engine;
 
-    if (g_strcmp0(arrayeng->preedit->str, "w") == 0)
-    {
+    if (g_strcmp0(arrayeng->preedit->str, "w") == 0) {
         ibus_array_engine_update_auxiliary_text(arrayeng, _("1.comma 2.bracket 3.symbol 4.math 5.arrow 6.unit 7.table 8.roman 9.greek 0.bopomo"));
         is_aux_shown = TRUE;
     }
-    else if (is_aux_shown)
-    {
+    else if (is_aux_shown) {
         ibus_array_engine_update_auxiliary_text(arrayeng, "");
         ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
         is_aux_shown = FALSE;
@@ -459,8 +432,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         return FALSE;
 
 
-    switch (keyval)
-    {
+    switch (keyval) {
     case IBUS_space:
         if (arrayeng->preedit->len == 0)
             return FALSE;
@@ -499,19 +471,16 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
     case IBUS_Delete:
         if (arrayeng->preedit->len == 0)
             return FALSE;
-        if (arrayeng->cursor_pos > 0)
-        {
-            arrayeng->cursor_pos --;
+        if (arrayeng->cursor_pos > 0) {
+            arrayeng->cursor_pos-- ;
             g_string_erase (arrayeng->preedit, arrayeng->cursor_pos, 1);
             ibus_array_engine_update (arrayeng);
         }
         return TRUE; 
     }
 
-    if (arrayeng->preedit->len > 0 && (keyval >= IBUS_0 && keyval <= IBUS_9))
-    {
-        if (g_strcmp0(arrayeng->preedit->str, "w") == 0)
-        {
+    if (arrayeng->preedit->len > 0 && (keyval >= IBUS_0 && keyval <= IBUS_9)) {
+        if (g_strcmp0(arrayeng->preedit->str, "w") == 0) {
             g_string_insert_c (arrayeng->preedit,
                                arrayeng->cursor_pos,
                                keyval);
@@ -522,11 +491,9 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         return ibus_array_engine_process_candidate_key_event(arrayeng, keyval, modifiers);
     }
 
-    if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon)
-    {
+    if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon) {
         if (arrayeng->space_press_count == 1)
-            if (arrayeng->table->candidates->len > 0)
-            {
+            if (arrayeng->table->candidates->len > 0) {
                 gboolean commit_rev;
 
                 ibus_lookup_table_set_cursor_pos (arrayeng->table, 0);
@@ -550,8 +517,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
     return FALSE;
 }
 
-static gboolean ibus_array_engine_process_candidate_key_event (IBusArrayEngine *arrayeng, guint keyval, guint modifiers)
-{
+static gboolean ibus_array_engine_process_candidate_key_event (IBusArrayEngine *arrayeng, guint keyval, guint modifiers) {
     if (keyval >= IBUS_0 && keyval <= IBUS_9) {
         guint page_no;
         guint page_size;
@@ -582,33 +548,28 @@ static void ibus_array_engine_space_press (IBusArrayEngine *arrayeng)
 {
     guint page_size;
     page_size = ibus_lookup_table_get_page_size (arrayeng->table);
-    if (arrayeng->table->candidates->len > page_size)
-    {
+    if (arrayeng->table->candidates->len > page_size) {
         ibus_lookup_table_page_down (arrayeng->table);
         ibus_engine_update_lookup_table ((IBusEngine *) arrayeng, arrayeng->table, TRUE);
         return;
     }
     
-    if (arrayeng->space_press_count == 0)
-    {
+    if (arrayeng->space_press_count == 0) {
         arrayeng->space_press_count ++;
 
         ibus_array_engine_update (arrayeng);
 
-        if (arrayeng->table->candidates->len == 1)
-        {
+        if (arrayeng->table->candidates->len == 1) {
             gboolean commit_rev;
 
             ibus_lookup_table_set_cursor_pos(arrayeng->table, 0);
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
         }
     }
-    else if (arrayeng->space_press_count == 1)
-    {
+    else if (arrayeng->space_press_count == 1) {
         gboolean commit_rev;
 
-        if (arrayeng->table->candidates->len > 0)
-        {
+        if (arrayeng->table->candidates->len > 0) {
             ibus_lookup_table_set_cursor_pos (arrayeng->table, 0);
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
         }
@@ -621,8 +582,7 @@ static void ibus_array_engine_update_auxiliary_text(IBusArrayEngine *arrayeng, g
 {
     IBusText *text;
 
-    if (aux_string)
-    {
+    if (aux_string) {
         text = ibus_text_new_from_string(aux_string);
         ibus_engine_update_auxiliary_text((IBusEngine*)arrayeng, text, TRUE);
     }
@@ -633,15 +593,14 @@ static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
     if (!is_special_notify)
         return;
 
-    if (arrayeng->preedit->len != 2)
-    {
+    if (arrayeng->preedit->len != 2) {
         ibus_engine_hide_auxiliary_text((IBusEngine*)arrayeng);
         return;
     }
 
     GArray* candidates = array_get_reverted_char_candidates_from_special(array_context, arrayeng->preedit->str);
-    if (candidates->len == 1)
-    {
+
+    if (candidates->len == 1) {
         gchar* sch = g_array_index(candidates, gchar*, 0);
         GString* keystr = array_get_preedit_string(arrayeng->preedit);
         gchar* show_str = g_strdup_printf("%s: %s", sch, keystr->str);
@@ -657,14 +616,12 @@ static void ibus_array_engine_show_special_code(IBusArrayEngine *arrayeng)
     array_release_candidates(candidates);
 }
 
-static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *arrayeng, gchar *ch)
-{
+static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *arrayeng, gchar *ch) {
     if (!is_special_notify)
         return;
 
     GArray* candidates = array_get_reverted_key_candidates_from_special(array_context, ch);
-    if (candidates->len == 1)
-    {
+    if (candidates->len == 1) {
         gchar* rawkeys = g_array_index(candidates, gchar*, 0);
         GString *rawkeystr = g_string_new(rawkeys);
         GString* keystr = array_get_preedit_string(rawkeystr);
@@ -682,10 +639,8 @@ static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *array
     array_release_candidates(candidates);
 }
 
-static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, gint prop_state)
-{
-    if (g_strcmp0(prop_name, "setup") == 0)
-    {
+static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, gint prop_state) {
+    if (g_strcmp0(prop_name, "setup") == 0) {
         GError *error = NULL;
         gchar *argv[2] = { NULL, };
         gchar *path;
@@ -704,8 +659,7 @@ static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar
     }
 }
 
-static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *section,  const gchar *name, GVariant *value, gpointer unused)
-{
+static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *section,  const gchar *name, GVariant *value, gpointer unused) {
     if (g_strcmp0(section, "engine/array") == 0)
         if (g_strcmp0(name, "specialnotify") == 0)
             is_special_notify = g_variant_get_boolean (value);
