@@ -36,8 +36,8 @@ class Setup:
         self.__create_ui()
 
     def __create_ui(self):
-	gettext.bindtextdomain("ibus-array")
-	gettext.textdomain("ibus-array")
+        gettext.bindtextdomain("ibus-array")
+        gettext.textdomain("ibus-array")
         self.__window = Gtk.Dialog(_('ibus-array setup'), None, 
                                     Gtk.DialogFlags.MODAL, 
                                     (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, 
@@ -95,9 +95,9 @@ class Setup:
                     self.__special_notify_button.set_active(False)
 
     def __read(self, name, v):
-	value = self.__config.get_value("engine/Array", name)
-	if value is None:
-		return v
+        value = self.__config.get_value("engine/Array", name)
+        if value is None:
+            return v
         return value
 
     def __write(self, name, v):
