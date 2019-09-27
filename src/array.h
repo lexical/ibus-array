@@ -1,7 +1,7 @@
 /*
  ibus-array - The Array 30 Engine for IBus
 
- Copyright (c) 2009-2014 Yu-Chun Wang <mainlander1122@gmail.com>
+ Copyright (c) 2009-2019 Yu-Chun Wang <mainlander1122@gmail.com>
                          Keng-Yu Lin <kengyu@lexical.tw>
 
  This program is free software; you can redistribute it and/or modify

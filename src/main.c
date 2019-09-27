@@ -1,8 +1,8 @@
 /*
  ibus-array - The Array 30 Engine for IBus
 
- Copyright (c) 2009-2014 Yu-Chun Wang <mainlander1122@gmail.com>
-                         Keng-Yu Lin <kengyu@lexical.tw>
+ Copyright (c) 2009-2019 Yu-Chun Wang <mainlander1122@gmail.com>
+                         Keng-Yu Lin <kengyu@debian.org>
 
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -58,10 +58,10 @@ init (void)
 
     component = ibus_component_new ("org.freedesktop.IBus.Array",
                                     "Array 30 Input Method",
-                                    "0.0.1",
+                                    "0.2.2",
                                     "GPL",
-                                    "Yu-Chun Wang <mainlander1122@gmail.com>",
-                                    "http://code.google.com/p/ibus/",
+                                    "Keng-Yu Lin <kengyu@debian.org>",
+                                    "https://github.com/lexical/ibus-array",
                                     "",
                                     "ibus-array");
     ibus_component_add_engine (component,
@@ -70,7 +70,7 @@ init (void)
                                                      "Array 30 Input Method",
                                                      "zh_TW",
                                                      "GPL",
-                                                     "Yu-Chun Wang <mainlander1122@gmail.com>",
+                                                     "Keng-Yu Lin <kengyu@debian.org>",
                                                      PKGDATADIR"/icon/ibus-array.png",
                                                      "us"));
 

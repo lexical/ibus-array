@@ -3,7 +3,8 @@
 #
 # ibus-array - The Array 30 Engine for IBus
 #
-# Copyright (c) 2009 Yu-Chun Wang <mainlander1122@gmail.com>
+# Copyright (c) 2009-2019 Keng-Yu Lin  <kengyu@debian.org>
+#                         Yu-Chun Wang <mainlander1122@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
