@@ -220,7 +220,7 @@ static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng) {
         arrayeng->table = NULL;
     }
 
-	IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)arrayeng);
+    IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)arrayeng);
 }
 
 static void ibus_array_engine_reset(IBusEngine *engine) {
@@ -229,7 +229,7 @@ static void ibus_array_engine_reset(IBusEngine *engine) {
     arrayeng->cursor_pos = 0;
     arrayeng->space_press_count = 0;
 
-    ibus_array_engine_update_preedit (arrayeng);
+    ibus_engine_hide_preedit_text (engine);
     ibus_engine_hide_lookup_table (engine);
     ibus_engine_hide_auxiliary_text (engine);
     parent_class->reset(engine);
