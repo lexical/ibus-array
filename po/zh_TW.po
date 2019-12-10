@@ -5,39 +5,51 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.0.4\n"
-"Report-Msgid-Bugs-To: http://code.google.com/p/ibus/issues/entry\n"
-"POT-Creation-Date: 2014-11-01 18:21+0800\n"
-"PO-Revision-Date: 2014-11-01 16:44+0800\n"
-"Last-Translator: Keng-Yu Lin <kengyu@lexical.tw>\n"
+"Project-Id-Version: ibus-array 0.2.2\n"
+"Report-Msgid-Bugs-To: https://github.com/ibus/ibus-anthy/issues\n"
+"POT-Creation-Date: 2019-12-10 22:09+0800\n"
+"PO-Revision-Date: 2019-12-10 22:12+0800\n"
+"Last-Translator: Anthony Fok <foka@debian.org>\n"
 "Language-Team: Chinese (traditional)\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/engine.c:179
+#: src/array.inputMethod.xml.in.in:5
+msgid "Array 30 Input Method Component"
+msgstr "行列30輸入法元件"
+
+#: src/array.inputMethod.xml.in.in:24
+msgid "Array"
+msgstr "行列"
+
+#: src/array.inputMethod.xml.in.in:25
+msgid "Array 30 Input Method 行列30輸入法"
+msgstr "行列30輸入法 Array 30 Input Method"
+
+#: src/engine.c:194
 msgid "Setup"
 msgstr "設定"
 
-#: src/engine.c:180
+#: src/engine.c:195
 msgid "Configure Array 30 engine"
 msgstr "設定行列輸入法"
 
-#: src/engine.c:422
+#: src/engine.c:416
 msgid ""
 "1.comma 2.bracket 3.symbol 4.math 5.arrow 6.unit 7.table 8.roman 9.greek 0."
 "bopomo"
 msgstr "1.標點 2.括弧 3.符號 4.數學 5.箭頭 6.單位 7.圖表 8.羅馬 9.希臘 0.注音"
 
-#: setup/main.py:43
+#: setup/main.py:42
 msgid "ibus-array setup"
 msgstr "行列輸入法設定"
 
-#: setup/main.py:50
+#: setup/main.py:49
 msgid "Special Code Notification"
 msgstr "當有特別碼時，顯示提示"
 
-#: setup/main.py:52
-msgid "Speical Code Only Mode"
+#: setup/main.py:51
+msgid "Special Code Only Mode"
 msgstr "當有特別碼時，只能用特別碼輸入 (特別碼練習模式)"
