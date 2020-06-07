@@ -2,7 +2,9 @@
 #
 # ibus-tmpl - The Input Bus template project
 #
-# Copyright (c) 2007-2008 Huang Peng <shawn.p.huang@gmail.com>
+# Copyright (c) 2007-2020 Huang Peng  <shawn.p.huang@gmail.com>
+# Copyright (c)           Anthony Fok <foka@debian.org>
+# Copyright (c)           Keng-Yu Lin <kengyu@debian.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +30,7 @@ m4_define([ibus_array_micro_version], [2])
 m4_define([ibus_array_version],
     ibus_array_major_version.ibus_array_minor_version.ibus_array_micro_version)
 
-AC_INIT([package_name], [ibus_array_version], [https://github.com/ibus/ibus-anthy/issues], [package_name])
+AC_INIT([package_name], [ibus_array_version], [https://github.com/lexical/ibus-array/issues], [package_name])
 AM_INIT_AUTOMAKE([1.10])
 AC_GNU_SOURCE
 

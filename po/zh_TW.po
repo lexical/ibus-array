@@ -1,12 +1,11 @@
 # ibus-array Traditional Chinese Translation
-# Copyright (C) 2014 Keng-Yu Lin <kengyu@lexical.tw>
+# Copyright (c) 2014-2020 Anthony Fok <foka@debian.org>
+# Copyright (c)           Keng-Yu Lin <kengyu@debian.org>
 # This file is distributed under the same license as the ibus-package package.
-# Keng-Yu Lin <kengyu@lexical.tw>, 2014
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: ibus-array 0.2.2\n"
-"Report-Msgid-Bugs-To: https://github.com/ibus/ibus-anthy/issues\n"
+"Report-Msgid-Bugs-To: https://github.com/lexical/ibus-array/issues\n"
 "POT-Creation-Date: 2019-12-10 22:09+0800\n"
 "PO-Revision-Date: 2019-12-10 22:12+0800\n"
 "Last-Translator: Anthony Fok <foka@debian.org>\n"
