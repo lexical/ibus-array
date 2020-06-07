@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- filename: array.xml -->
+<component>
+	<name>org.freedesktop.IBus.Array</name>
+	<description>Array 30 Input Method Component</description>
+	<exec>@LIBEXECDIR@/ibus-engine-array --ibus</exec>
+	<version>@VERSION@</version>
+	<author>
+	王昱鈞  Yu-Chun Wang &lt;mainlander1122@gmail.com&gt;
+	林耕宇  Keng-Yu Lin &lt;kengyu@debian.org&gt;</author>
+	<license>GPL</license>
+	<homepage>https://github.com/lexical/ibus-array</homepage>
+	<textdomain>ibus-array</textdomain>
+	<engines>
+		<engine>
+			<name>array</name>
+			<language>zh_TW</language>
+			<license>GPL</license>
+			<author>
+	王昱鈞  Yu-Chun Wang &lt;mainlander1122@gmail.com&gt;
+	林耕宇  Keng-Yu Lin &lt;kengyu@debian.org&gt;</author>
+			<icon>@PKGDATADIR@/icons/ibus-array.png</icon>
+			<layout>us</layout>
+			<longname>Array</longname>
+			<description>Array 30 Input Method
+行列30輸入法</description>
+			<rank>99</rank>
+			<symbol>&#x884C;</symbol>
+			<setup>@LIBEXECDIR@/ibus-setup-array</setup>
+		</engine>
+	</engines>
+</component>

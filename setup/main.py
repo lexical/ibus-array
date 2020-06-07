@@ -48,7 +48,7 @@ class Setup:
         self.__window.set_icon_from_file(icon_file)
         self.__special_notify_button = Gtk.CheckButton(_("Special Code Notification"))
         self.__window.vbox.pack_start(self.__special_notify_button, True, True, 10)
-        self.__special_only_button = Gtk.CheckButton(_("Speical Code Only Mode"))
+        self.__special_only_button = Gtk.CheckButton(_("Special Code Only Mode"))
         self.__window.vbox.pack_start(self.__special_only_button, True, True ,10)
 
         current_special_mode = self.__read("SpecialOnly", False)

@@ -47,20 +47,17 @@ component_DATA = \
 componentdir = @datadir@/ibus/component
 
 EXTRA_DIST = \
-	array.xml.in \
+	array.inputMethod.xml.in \
 	$(NULL)
 
 CLEANFILES = \
 	array.xml \
 	$(NULL)
 
-array.xml: array.xml.in
-	( \
-		libexecdir=${libexecdir}; \
-		pkgdatadir=${pkgdatadir}; \
-		s=`cat $<`; \
-		eval "echo \"$${s}\""; \
-	) > $@
+%.xml: %.inputMethod.xml.in
+	sed -e "s|\@LIBEXECDIR\@|$(libexecdir)|g" \
+	    -e "s|\@PKGDATADIR\@|$(pkgdatadir)|g" \
+	$< > $@
 
 test: ibus-engine-array
 	$(builddir)/ibus-engine-array

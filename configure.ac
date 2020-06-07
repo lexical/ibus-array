@@ -20,15 +20,15 @@
 
 # if not 1, append datestamp to the version number.
 m4_define([package_name], [ibus-array])
-m4_define([ibus_released], [0])
-m4_define([ibus_major_version], [0])
-m4_define([ibus_minor_version], [0])
-m4_define([ibus_micro_version], [2])
+m4_define([ibus_array_released], [0])
+m4_define([ibus_array_major_version], [0])
+m4_define([ibus_array_minor_version], [2])
+m4_define([ibus_array_micro_version], [2])
 
-m4_define([ibus_version],
-    ibus_major_version.ibus_minor_version.ibus_micro_version)
+m4_define([ibus_array_version],
+    ibus_array_major_version.ibus_array_minor_version.ibus_array_micro_version)
 
-AC_INIT([package_name], [ibus_version], [http://code.google.com/p/ibus/issues/entry], [package_name])
+AC_INIT([package_name], [ibus_array_version], [https://github.com/ibus/ibus-anthy/issues], [package_name])
 AM_INIT_AUTOMAKE([1.10])
 AC_GNU_SOURCE
 
@@ -80,7 +80,7 @@ AC_CONFIG_FILES(po/Makefile.in
 Makefile
 ibus-array.spec
 src/Makefile
-src/array.xml.in
+src/array.inputMethod.xml.in
 icons/Makefile
 setup/Makefile
 setup/ibus-setup-array
