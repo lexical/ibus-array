@@ -59,7 +59,7 @@ PKG_CHECK_MODULES(IBUS, [
 ])
 
 #check python
-AM_PATH_PYTHON([2.5])
+AM_PATH_PYTHON([3.0])
 
 # check sqlite3
 PKG_CHECK_MODULES(SQLITE3, [

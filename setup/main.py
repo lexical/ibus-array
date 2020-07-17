@@ -22,8 +22,11 @@
  
 import sys
 import os
-from gi.repository import GLib
+import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("IBus", "1.0")
 from gi.repository import Gtk
+from gi.repository import GLib
 from gi.repository import IBus
 from gettext import gettext as _
 import gettext
