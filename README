@@ -3,3 +3,10 @@ This is a Array 30 engine for iBus.
 
 The source code can be obtained from:
     https://github.com/lexical/ibus-array
+
+To test your contribution locally
+1. Make sure `ibus-array` is working before your changes.
+2. Locate the working installation of `ibus-array` (likely under `/usr`).
+3. Use `autogen.sh --prefix` to specify where `make install` copies your custom build to.
+4. `make` and `make install` your changes, make sure it overwrites existing installation.
+5. `kill` and restart `ibus-daemon --xim`.
