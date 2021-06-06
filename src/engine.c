@@ -407,6 +407,8 @@ static void ibus_array_engine_update (IBusArrayEngine *arrayeng) {
 }
 
 #define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z))
+#define is_root(c)  ((is_alpha (c)  || (c) == IBUS_period || (c) == IBUS_comma || (c) == IBUS_slash || (c) == IBUS_semicolon))
+#define is_wildcard(c) (((c) == IBUS_question))
 
 static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint keyval, guint keycode, guint modifiers) {
     IBusText *text;
@@ -491,7 +493,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         return ibus_array_engine_process_candidate_key_event(arrayeng, keyval, modifiers);
     }
 
-    if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon) {
+    if (is_root (keyval) || is_wildcard (keyval)) {
         if (arrayeng->space_press_count == 1)
             if (arrayeng->table->candidates->len > 0) {
                 gboolean commit_rev;

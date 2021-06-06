@@ -55,7 +55,8 @@ static gchar* valid_key_map[] = {
     "8v", //,
     "9v", //.
     "0v", ///
-    "0-"  //;
+    "0-", //;
+    " ?", //?
 };
 
 ArrayContext* array_create_context() {
@@ -98,6 +99,9 @@ GString* array_get_preedit_string(GString *preedit) {
         else if (c == ';') {
             index = 29;
         }
+        else if (c == '?') {
+            index = 30;
+        }
 
         if (index >= 0) {
             g_string_append(result, valid_key_map[index]);
@@ -123,7 +127,7 @@ GArray* array_get_candidates_from_main(ArrayContext *context, gchar *keys) {
     sqlite3_stmt *stmt;
 
     int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE keys=?", -1, &stmt, NULL);
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE keys GLOB ?", -1, &stmt, NULL);
     if (retcode == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
         while (sqlite3_step(stmt) == SQLITE_ROW) {
