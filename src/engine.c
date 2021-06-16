@@ -70,7 +70,7 @@ static void ibus_array_engine_page_down (IBusEngine *engine);
 static void ibus_array_engine_cursor_up (IBusEngine *engine);
 static void ibus_array_engine_cursor_down (IBusEngine *engine);
 
-static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, gint prop_state);
+static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, guint prop_state);
 static void ibus_array_engine_property_show (IBusEngine *engine, const gchar *prop_name);
 static void ibus_array_engine_property_hide (IBusEngine *engine, const gchar *prop_name);
 
@@ -649,7 +649,7 @@ static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *array
     array_release_candidates(candidates);
 }
 
-static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, gint prop_state) {
+static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, guint prop_state) {
     if (g_strcmp0(prop_name, "setup") == 0) {
         GError *error = NULL;
         gchar *argv[2] = { NULL, };
