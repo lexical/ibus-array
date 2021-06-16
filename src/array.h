@@ -32,7 +32,7 @@ typedef struct _ArrayContext {
 ArrayContext* array_create_context();
 void array_release_context(ArrayContext *context);
 GString* array_get_preedit_string(GString *preedit);
-GArray* array_get_candidates_from_main(ArrayContext *context, gchar *keys);
+GArray* array_get_candidates_from_main(ArrayContext *context, gchar *keys, guint wildcard_char_count);
 GArray* array_get_candidates_from_simple(ArrayContext *context, gchar *keys);
 GArray* array_get_candidates_from_special(ArrayContext *context, gchar *keys);
 GArray* array_get_reverted_key_candidates_from_special(ArrayContext *context, gchar *ch);

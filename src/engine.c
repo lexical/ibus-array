@@ -38,6 +38,7 @@ struct _IBusArrayEngine {
     GString *preedit;
     gint cursor_pos;
     guint space_press_count;
+    guint wildcard_char_count;
 
     IBusLookupTable *table;
     IBusPropList *prop_list;
@@ -188,6 +189,7 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
     arrayeng->preedit = g_string_new ("");
     arrayeng->cursor_pos = 0;
     arrayeng->space_press_count = 0;
+    arrayeng->wildcard_char_count = 0;
 
     arrayeng->table = ibus_lookup_table_new (10, 0, FALSE, TRUE);
     g_object_ref_sink (arrayeng->table);
@@ -228,6 +230,7 @@ static void ibus_array_engine_reset(IBusEngine *engine) {
     g_string_assign (arrayeng->preedit, "");
     arrayeng->cursor_pos = 0;
     arrayeng->space_press_count = 0;
+    arrayeng->wildcard_char_count = 0;
 
     ibus_engine_hide_preedit_text (engine);
     ibus_engine_hide_lookup_table (engine);
@@ -269,7 +272,7 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng) {
     if (arrayeng->preedit->len <= 2 && arrayeng->space_press_count == 0)
         candidates = array_get_candidates_from_simple(array_context, arrayeng->preedit->str);
     else
-        candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
+        candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str, arrayeng->wildcard_char_count);
     
     if (candidates == NULL) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
@@ -330,7 +333,7 @@ static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *a
 
     GArray *candidates = NULL;
 
-    candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str);
+    candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str, arrayeng->wildcard_char_count);
     
     if (candidates == NULL) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
@@ -407,6 +410,8 @@ static void ibus_array_engine_update (IBusArrayEngine *arrayeng) {
 }
 
 #define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z))
+#define is_root(c)  ((is_alpha (c)  || (c) == IBUS_period || (c) == IBUS_comma || (c) == IBUS_slash || (c) == IBUS_semicolon))
+#define is_wildcard(c) (((c) == IBUS_question))
 
 static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint keyval, guint keycode, guint modifiers) {
     IBusText *text;
@@ -473,6 +478,8 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
             return FALSE;
         if (arrayeng->cursor_pos > 0) {
             arrayeng->cursor_pos-- ;
+            if (is_wildcard (arrayeng->preedit->str[arrayeng->cursor_pos]))
+		arrayeng->wildcard_char_count --;
             g_string_erase (arrayeng->preedit, arrayeng->cursor_pos, 1);
             ibus_array_engine_update (arrayeng);
         }
@@ -491,7 +498,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         return ibus_array_engine_process_candidate_key_event(arrayeng, keyval, modifiers);
     }
 
-    if (is_alpha (keyval) || keyval == IBUS_period || keyval == IBUS_comma || keyval == IBUS_slash || keyval == IBUS_semicolon) {
+    if (is_root (keyval) || is_wildcard (keyval)) {
         if (arrayeng->space_press_count == 1)
             if (arrayeng->table->candidates->len > 0) {
                 gboolean commit_rev;
@@ -505,6 +512,9 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 
         if (arrayeng->preedit->len >= 5)
                 return TRUE;
+
+	if (is_wildcard (keyval))
+            arrayeng->wildcard_char_count ++;
 
         g_string_insert_c (arrayeng->preedit, arrayeng->cursor_pos, keyval);
 
