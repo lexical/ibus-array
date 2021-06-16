@@ -42,16 +42,18 @@ class Setup:
     def __create_ui(self):
         gettext.bindtextdomain("ibus-array")
         gettext.textdomain("ibus-array")
-        self.__window = Gtk.Dialog(_('ibus-array setup'), None, 
-                                    Gtk.DialogFlags.MODAL, 
-                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, 
-                                     Gtk.STOCK_OK, Gtk.ResponseType.OK)
-                                  )
+        self.__window = Gtk.Dialog(
+            title=_('ibus-array setup'),
+            parent=None,
+            modal=True)
+        self.__window.add_buttons(
+            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OK, Gtk.ResponseType.OK)
         icon_file = os.path.join(config.datadir, "ibus-array", "icons", "ibus-array.png")
         self.__window.set_icon_from_file(icon_file)
-        self.__special_notify_button = Gtk.CheckButton(_("Special Code Notification"))
+        self.__special_notify_button = Gtk.CheckButton(label=_("Special Code Notification"))
         self.__window.vbox.pack_start(self.__special_notify_button, True, True, 10)
-        self.__special_only_button = Gtk.CheckButton(_("Special Code Only Mode"))
+        self.__special_only_button = Gtk.CheckButton(label=_("Special Code Only Mode"))
         self.__window.vbox.pack_start(self.__special_only_button, True, True ,10)
 
         current_special_mode = self.__read("SpecialOnly", False)
