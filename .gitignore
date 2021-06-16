@@ -1,9 +1,22 @@
+*.log
+*.swp
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
 compile
 config.guess
+config.h
+config.h.in
 config.rpath
+config.status
 config.sub
+configure
 depcomp
+ibus-array.spec
 install-sh
+libtool
+ltmain.sh
 m4/codeset.m4
 m4/glibc2.m4
 m4/glibc21.m4
@@ -29,4 +42,6 @@ m4/wint_t.m4
 m4/xsize.m4
 missing
 po/Makevars.template
+py-compile
+stamp-h1
 
