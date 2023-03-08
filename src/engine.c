@@ -313,8 +313,11 @@ static void ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng) {
     
     ibus_engine_update_preedit_text ((IBusEngine *)arrayeng, text, array_preedit->len, TRUE);
 
+#if IBUS_CHECK_VERSION (1, 3, 0)
+#else
     if (G_IS_OBJECT (text) && g_object_is_floating (text))
     	g_object_unref (text);
+#endif
 
     g_string_free(array_preedit, TRUE);
 }
@@ -399,8 +402,11 @@ static void ibus_array_engine_commit_string (IBusArrayEngine *arrayeng, const gc
     IBusText *text;
     text = ibus_text_new_from_static_string (string);
     ibus_engine_commit_text ((IBusEngine *)arrayeng, text);
+#if IBUS_CHECK_VERSION (1, 3, 0)
+#else
     if (g_object_is_floating (text))
     	g_object_unref (text);
+#endif
 }
 
 static void ibus_array_engine_update (IBusArrayEngine *arrayeng) {
