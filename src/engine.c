@@ -457,6 +457,8 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
             return TRUE;
 
     case IBUS_Escape:
+        if (arrayeng->preedit->len == 0)
+            return FALSE;
         ibus_array_engine_reset((IBusEngine*)arrayeng);
         return TRUE;        
 
