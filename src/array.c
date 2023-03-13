@@ -245,7 +245,7 @@ array_input_key_is_not_special(ArrayContext* context,
     gchar *special_keys = NULL;
 
     retcode = sqlite3_prepare_v2(context->conn, 
-            "SELECT keys FROM special WHERE ch=?", -1, &stmt, NULL);
+            "SELECT keys FROM main WHERE cat='2' AND ch=?", -1, &stmt, NULL);
 
     if (retcode == SQLITE_OK) {
         sqlite3_bind_text(stmt, 1, ch, -1, SQLITE_TRANSIENT);
