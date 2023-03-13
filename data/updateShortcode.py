@@ -29,4 +29,4 @@ cur.execute('DELETE FROM simple;')
 con.commit()
 con.close()
 
-array_updatedb('array30_simplecode.cin', 'simple')
+array_updatedb('array-shortcode-20210725.cin', 'simple')
