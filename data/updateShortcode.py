@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pysqlite2 import dbapi2 as sqlite
+import sqlite3 as sqlite
 
 def array_updatedb(table_file, table):
 	con = sqlite.connect("array.db")

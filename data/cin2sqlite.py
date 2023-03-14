@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # cin2db - Convert cin table to sqlite db
@@ -19,7 +19,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from pysqlite2 import dbapi2 as sqlite
+import sqlite3 as sqlite
 from sys import argv
 
 REGION_UNIFIED_ExtA  = 1
@@ -37,7 +37,7 @@ STR_UNIFIED_ExtB  = "CJK Unified Ideographs Extension B"
 STR_UNIFIED_ExtCD = "CJK Unified Ideographs Extension C & D"
 STR_UNIFIED_ExtE  = "CJK Unified Ideographs Extension E"
 STR_UNIFIED_ExtF  = "CJK Unified Ideographs Extension F"
-STR_ARRAY_SYMBOL  = "CJK Symbols & Punctuation for Array30 input method (w+0~9)"
+STR_ARRAY_SYMBOL  = "CJK Symbols & Punctuation (w+0~9)"
 STR_UNIFIED_ExtG  = "CJK Unified Ideographs Extension G"
 
 REG_STACK = []
@@ -51,6 +51,11 @@ def array_updatedb(table_file):
         f = open(table_file, 'r')
         for ln in f.readlines():
             ln = ln.strip()
+            print("This is ln: " + ln)
+
+            if  (ln == "%chardef begin"):
+                print("This is begin")
+                REG_STACK.append(-1)
 
             if  (ln == "# Begin of " + STR_UNIFIED_ExtA):
                 print("Enter: " + STR_UNIFIED_ExtA)
@@ -76,9 +81,13 @@ def array_updatedb(table_file):
                 print("Enter: " + STR_UNIFIED_ExtF)
                 REG_STACK.append(REGION_UNIFIED_ExtF)
 
-            elif(ln == "# " + STR_ARRAY_SIMPLE):
-                print(STR_ARRAY_SIMPLE)
-                REG_STACK.append(REGION_ARRAY_SIMPLE)
+            elif(ln == "# Begin of " + STR_UNIFIED_ExtG):
+                print("Enter: " + STR_UNIFIED_ExtG)
+                REG_STACK.append(REGION_UNIFIED_ExtG)
+
+            elif(ln == "# Begin of " + STR_ARRAY_SYMBOL):
+                print("Enter: " + STR_ARRAY_SYMBOL)
+                REG_STACK.append(REGION_ARRAY_SYMBOL)
 
             elif(ln == "# End of " + STR_UNIFIED_ExtA):
                 print("Exit: " + STR_UNIFIED_ExtA)
@@ -108,8 +117,8 @@ def array_updatedb(table_file):
                 print("Exit: " + STR_UNIFIED_ExtG)
                 REG_STACK.pop()
 
-            elif(ln == "%chardef end"):
-                print("End of CJK Symbols & Punctuation for Array30 input method (w+0~9)")
+            elif(ln == "# End of " + STR_ARRAY_SYMBOL):
+                print("Exit: " + STR_ARRAY_SYMBOL)
                 REG_STACK.pop()
 
             elif(ln == "%chardef end"):
