@@ -146,6 +146,28 @@ GArray* array_get_candidates_from_main(ArrayContext *context, gchar *keys, guint
     return result;
 }
 
+GArray* array_get_candidates_from_phrase(ArrayContext *context, gchar *keys) {
+    GArray *result;
+    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
+
+    sqlite3_stmt *stmt;
+
+    int retcode;
+    retcode = sqlite3_prepare_v2(context->conn, "SELECT ph FROM phrase WHERE keys=?", -1, &stmt, NULL);
+    if (retcode == SQLITE_OK) {
+        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
+            gchar *chstr = g_strdup(ch);
+            g_array_append_val(result, chstr);
+        }
+    }
+    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
+
+    return result;
+}
+
 GArray* array_get_candidates_from_simple(ArrayContext *context, gchar *keys) {
     GArray *result;
     result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
@@ -234,8 +256,8 @@ GArray* array_get_reverted_char_candidates_from_special(ArrayContext *context, g
     return result;
 }
 
-gboolean 
-array_input_key_is_not_special(ArrayContext* context, 
+gboolean
+array_input_key_is_not_special(ArrayContext* context,
                                 const gchar* keys, const gchar* ch)
 {
     sqlite3_stmt *stmt;
@@ -244,7 +266,7 @@ array_input_key_is_not_special(ArrayContext* context,
     gboolean result = FALSE;
     gchar *special_keys = NULL;
 
-    retcode = sqlite3_prepare_v2(context->conn, 
+    retcode = sqlite3_prepare_v2(context->conn,
             "SELECT keys FROM main WHERE cat='2' AND ch=?", -1, &stmt, NULL);
 
     if (retcode == SQLITE_OK) {
