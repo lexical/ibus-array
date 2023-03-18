@@ -49,7 +49,7 @@ z 1⇣
 #%quickkey end
 
 %chardef begin
-# Begin of CJK Unified Ideographs
+# Begin of CJK Unified Ideographs Base
 cpu	溫
 wpu	媼
 g.;	啟
@@ -13632,6 +13632,7 @@ iolj	鉚
 u,av	鮇
 grsz	碡
 /rsz	蝳
+# End of CJK Unified Ideographs Base
 
 # Begin of Special Codes
 ,;	嗚
@@ -24350,7 +24351,6 @@ rhbt	鿾
 rhtt	鿾
 qhkc	鿿
 # End of Compatible Input Codes
-# End of CJK Unified Ideographs
 
 # Begin of CJK Unified Ideographs Extension A
 fai	㐀
