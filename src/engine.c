@@ -271,7 +271,8 @@ static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng) {
 
     GArray *candidates = NULL;
 
-    if (arrayeng->preedit->len <= 2 && arrayeng->space_press_count == 0)
+    if (arrayeng->preedit->len <= 2 && arrayeng->space_press_count == 0 &&
+        arrayeng->wildcard_char_count == 0)
         candidates = array_get_candidates_from_simple(array_context, arrayeng->preedit->str);
     else
         candidates = array_get_candidates_from_main(array_context, arrayeng->preedit->str, arrayeng->wildcard_char_count);
@@ -543,7 +544,8 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         if (arrayeng->cursor_pos > 0) {
             arrayeng->cursor_pos-- ;
             if (is_wildcard (arrayeng->preedit->str[arrayeng->cursor_pos]))
-		arrayeng->wildcard_char_count --;
+                arrayeng->wildcard_char_count --;
+            arrayeng->space_press_count = 0;
             g_string_erase (arrayeng->preedit, arrayeng->cursor_pos, 1);
             ibus_array_engine_update (arrayeng);
         }
