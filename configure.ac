@@ -76,6 +76,20 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Define to the read-only 
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION(0.16.1)
 
+AC_ARG_ENABLE(opencc,
+    AC_HELP_STRING([--enable-opencc],
+        [Use opencc for simplified Chinese conversion]),
+        [enable_opencc=$enableval],
+        [enable_opencc=yes]
+)
+if test x"$enable_opencc" = x"yes"; then
+    # check opencc
+    PKG_CHECK_MODULES(OPENCC, [opencc >= 1.0.0], [
+        AC_DEFINE(HAVE_OPENCC, 1, [Define if found opencc])
+        CFLAGS="$CFLAGS $OPENCC_CFLAGS"
+        LDFLAGS="$LDFLAGS $OPENCC_LIBS"
+    ])
+fi
 
 # OUTPUT files
 AC_CONFIG_FILES(po/Makefile.in

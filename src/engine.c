@@ -25,6 +25,10 @@
 #include "array.h"
 #include "config.h"
 
+#ifdef HAVE_OPENCC
+#  include <opencc.h>
+#endif
+
 #define _(String) gettext(String)
 #define ARRAY_SHORT_CODE_EMPTY_STRING "⎔"
 
@@ -100,8 +104,12 @@ static IBusEngineClass *parent_class = NULL;
 static IBusConfig *config = NULL;
 static gboolean is_special_notify;
 static gboolean is_special_only;
+static gboolean is_output_simplified;
 static gboolean is_aux_shown = FALSE;
 static ArrayContext *array_context = NULL;
+#ifdef HAVE_OPENCC
+static opencc_t cc_handle;
+#endif
 
 GType ibus_array_engine_get_type (void) {
 	static GType type = 0;
@@ -135,6 +143,7 @@ void ibus_array_init (IBusBus *bus) {
 
     is_special_notify = FALSE;
     is_special_only = FALSE;
+    is_output_simplified = FALSE;
 
     /* load config */
     GVariant* value;
@@ -147,14 +156,26 @@ void ibus_array_init (IBusBus *bus) {
     if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
             is_special_only = g_variant_get_boolean(value);
 
+    value = ibus_config_get_value (config, "engine/Array", "OutputSimplified");
+    if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
+            is_output_simplified = g_variant_get_boolean(value);
+
     /* gettext preparation */
     setlocale (LC_ALL, "");
     bindtextdomain (PACKAGE, LOCALEDIR);
     textdomain (PACKAGE);
+
+#ifdef HAVE_OPENCC
+    cc_handle = opencc_open("tw2s.json");
+#endif
 }
 
 void ibus_array_exit (void)
 {
+#ifdef HAVE_OPENCC
+    opencc_close(cc_handle);
+#endif
+
     array_release_context(array_context);
 
     if (g_object_is_floating (config))
@@ -419,7 +440,25 @@ static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arr
                     return FALSE;
             }
         }
-        ibus_engine_commit_text((IBusEngine*)arrayeng, text);
+
+#ifdef HAVE_OPENCC
+        if (is_output_simplified) {
+            char *converted = opencc_convert_utf8(cc_handle,
+                                                  text->text,
+                                                  strlen(text->text));
+            if(converted) {
+                IBusText* newtext = ibus_text_new_from_string(converted);
+                ibus_engine_commit_text((IBusEngine*)arrayeng, newtext);
+                opencc_convert_utf8_free(converted);
+            } else {
+                ibus_engine_commit_text((IBusEngine*)arrayeng, text);
+            }
+        } else {
+#endif
+            ibus_engine_commit_text((IBusEngine*)arrayeng, text);
+#ifdef HAVE_OPENCC
+        }
+#endif
 
         ibus_array_engine_reset((IBusEngine*)arrayeng);
 
@@ -741,5 +780,7 @@ static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *secti
             is_special_notify = g_variant_get_boolean (value);
         else if (g_strcmp0(name, "specialonly") == 0)
             is_special_only = g_variant_get_boolean (value);
+        else if (g_strcmp0(name, "outputsimplified") == 0)
+            is_output_simplified = g_variant_get_boolean (value);
 }
 
