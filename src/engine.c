@@ -108,7 +108,7 @@ static gboolean is_output_simplified;
 static gboolean is_aux_shown = FALSE;
 static ArrayContext *array_context = NULL;
 #ifdef HAVE_OPENCC
-static opencc_t cc_handle;
+static opencc_t cc_handle = NULL;;
 #endif
 
 GType ibus_array_engine_get_type (void) {
@@ -173,7 +173,8 @@ void ibus_array_init (IBusBus *bus) {
 void ibus_array_exit (void)
 {
 #ifdef HAVE_OPENCC
-    opencc_close(cc_handle);
+    if (cc_handle)
+        opencc_close(cc_handle);
 #endif
 
     array_release_context(array_context);
@@ -442,7 +443,7 @@ static gboolean ibus_array_engine_commit_current_candidate (IBusArrayEngine *arr
         }
 
 #ifdef HAVE_OPENCC
-        if (is_output_simplified) {
+        if (is_output_simplified && cc_handle != NULL) {
             char *converted = opencc_convert_utf8(cc_handle,
                                                   text->text,
                                                   strlen(text->text));
