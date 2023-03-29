@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- 
+
 import sys
 import os
 import gi
@@ -34,7 +34,7 @@ import config
 
 class Setup:
     def __init__(self, bus):
-        self.__bus = bus 
+        self.__bus = bus
         self.__config = self.__bus.get_config()
         self.__config.connect("value-changed", self.on_value_changed, None)
         self.__create_ui()
@@ -55,14 +55,19 @@ class Setup:
         self.__window.vbox.pack_start(self.__special_notify_button, True, True, 10)
         self.__special_only_button = Gtk.CheckButton(label=_("Special Code Only Mode"))
         self.__window.vbox.pack_start(self.__special_only_button, True, True ,10)
+        self.__output_simplified_button = Gtk.CheckButton(label=_("Convert output to simplified Chinese"))
+        self.__window.vbox.pack_start(self.__output_simplified_button, True, True, 10)
 
         current_special_mode = self.__read("SpecialOnly", False)
         current_special_notify = self.__read("SpecialNotify", False)
+        current_output_simplified = self.__read("OutputSimplified", False)
 
         if current_special_notify:
             self.__special_notify_button.set_active(True)
         if current_special_mode:
             self.__special_only_button.set_active(True)
+        if current_output_simplified:
+            self.__output_simplified_button.set_active(True)
 
         self.__window.show_all()
 
@@ -75,6 +80,7 @@ class Setup:
     def apply(self):
         select_special_notify = self.__special_notify_button.get_active()
         select_special_mode = self.__special_only_button.get_active()
+        select_output_simplified = self.__output_simplified_button.get_active()
 
         if select_special_notify:
             self.__write("SpecialNotify", GLib.Variant.new_boolean(True))
@@ -86,6 +92,11 @@ class Setup:
         else:
             self.__write("SpecialOnly", GLib.Variant.new_boolean(False))
 
+        if select_output_simplified:
+            self.__write("OutputSimplified", GLib.Variant.new_boolean(True))
+        else:
+            self.__write("OutputSimplified", GLib.Variant.new_boolean(False))
+
     def on_value_changed(self, config, section, name, value, data):
         if section == 'engine/Array':
             if name == 'SpecialNotify':
@@ -96,9 +107,15 @@ class Setup:
 
             elif name == 'SpecialOnly':
                 if value:
-                    self.__special_notify_button.set_active(True)
+                    self.__special_only_button.set_active(True)
                 else:
-                    self.__special_notify_button.set_active(False)
+                    self.__special_only_button.set_active(False)
+
+            elif name == 'OutputSimplified':
+                if value:
+                    self.__output_simplified_button.set_active(True)
+                else:
+                    self.__output_simplified_button.set_active(False)
 
     def __read(self, name, v):
         value = self.__config.get_value("engine/Array", name)

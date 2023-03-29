@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ibus-array 0.2.2\n"
 "Report-Msgid-Bugs-To: https://github.com/lexical/ibus-array/issues\n"
-"POT-Creation-Date: 2023-03-18 17:29+0800\n"
+"POT-Creation-Date: 2023-03-28 19:12+0800\n"
 "PO-Revision-Date: 2019-12-10 22:12+0800\n"
 "Last-Translator: Anthony Fok <foka@debian.org>\n"
 "Language-Team: Chinese (traditional)\n"
@@ -27,15 +27,15 @@ msgstr "行列"
 msgid "Array 30 Input Method 行列30輸入法"
 msgstr "行列30輸入法 Array 30 Input Method"
 
-#: src/engine.c:198
+#: src/engine.c:219
 msgid "Setup"
 msgstr "設定"
 
-#: src/engine.c:199
+#: src/engine.c:220
 msgid "Configure Array 30 engine"
 msgstr "設定行列輸入法"
 
-#: src/engine.c:464
+#: src/engine.c:504
 msgid ""
 "1.comma 2.bracket 3.symbol 4.math 5.arrow 6.unit 7.table 8.roman 9.greek 0."
 "bopomo"
@@ -52,3 +52,7 @@ msgstr "當有特別碼時，顯示提示"
 #: setup/main.py:56
 msgid "Special Code Only Mode"
 msgstr "當有特別碼時，只能用特別碼輸入 (特別碼練習模式)"
+
+#: setup/main.py:58
+msgid "Convert output to simplified Chinese"
+msgstr "出字時轉為簡體中文"
