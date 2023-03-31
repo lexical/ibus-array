@@ -595,7 +595,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 
     prev_pressed_key = keyval;
 
-    if (modifiers & (IBUS_SHIFT_MASK) && keyval == IBUS_space) {
+    if ((modifiers & IBUS_SHIFT_MASK) && keyval == IBUS_space) {
         ibus_array_engine_property_activate((IBusEngine *) engine,
                                             "fullwidth",
                                             PROP_STATE_UNCHECKED);
