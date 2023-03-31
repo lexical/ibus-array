@@ -57,10 +57,13 @@ class Setup:
         self.__window.vbox.pack_start(self.__special_only_button, True, True ,10)
         self.__output_simplified_button = Gtk.CheckButton(label=_("Convert output to simplified Chinese"))
         self.__window.vbox.pack_start(self.__output_simplified_button, True, True, 10)
+        self.__use_shift_button = Gtk.CheckButton(label=_("Use Shift to switch English/Chinese mode"))
+        self.__window.vbox.pack_start(self.__use_shift_button, True, True, 10)
 
         current_special_mode = self.__read("SpecialOnly", False)
         current_special_notify = self.__read("SpecialNotify", False)
         current_output_simplified = self.__read("OutputSimplified", False)
+        current_use_shift = self.__read("UseShift", False)
 
         if current_special_notify:
             self.__special_notify_button.set_active(True)
@@ -68,6 +71,8 @@ class Setup:
             self.__special_only_button.set_active(True)
         if current_output_simplified:
             self.__output_simplified_button.set_active(True)
+        if current_use_shift:
+            self.__use_shift_button.set_active(True)
 
         self.__window.show_all()
 
@@ -81,6 +86,7 @@ class Setup:
         select_special_notify = self.__special_notify_button.get_active()
         select_special_mode = self.__special_only_button.get_active()
         select_output_simplified = self.__output_simplified_button.get_active()
+        select_use_shift = self.__use_shift_button.get_active()
 
         if select_special_notify:
             self.__write("SpecialNotify", GLib.Variant.new_boolean(True))
@@ -96,6 +102,11 @@ class Setup:
             self.__write("OutputSimplified", GLib.Variant.new_boolean(True))
         else:
             self.__write("OutputSimplified", GLib.Variant.new_boolean(False))
+
+        if select_use_shift:
+            self.__write("UseShift", GLib.Variant.new_boolean(True))
+        else:
+            self.__write("UseShift", GLib.Variant.new_boolean(False))
 
     def on_value_changed(self, config, section, name, value, data):
         if section == 'engine/Array':
@@ -116,6 +127,12 @@ class Setup:
                     self.__output_simplified_button.set_active(True)
                 else:
                     self.__output_simplified_button.set_active(False)
+
+            elif name == 'UseShift':
+                if value:
+                    self.__use_shift_button.set_active(True)
+                else:
+                    self.__use_shift_button.set_active(False)
 
     def __read(self, name, v):
         value = self.__config.get_value("engine/Array", name)
