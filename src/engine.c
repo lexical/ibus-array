@@ -105,11 +105,26 @@ static IBusConfig *config = NULL;
 static gboolean is_special_notify;
 static gboolean is_special_only;
 static gboolean is_output_simplified;
+static gboolean is_use_shift;
+static gboolean is_english_mode;
+static gboolean is_fullwidth_mode;
 static gboolean is_aux_shown = FALSE;
+static gint prev_pressed_key = IBUS_VoidSymbol;
 static ArrayContext *array_context = NULL;
 #ifdef HAVE_OPENCC
 static opencc_t cc_handle = NULL;;
 #endif
+
+static char *sFullWidthTable[] = {
+    "　", "！", "＂", "＃", "＄", "％", "＆", "＇", "（", "）", "＊", "＋",
+    "，", "－", "．", "／", "０", "１", "２", "３", "４", "５", "６", "７",
+    "８", "９", "：", "；", "＜", "＝", "＞", "？", "＠", "Ａ", "Ｂ", "Ｃ",
+    "Ｄ", "Ｅ", "Ｆ", "Ｇ", "Ｈ", "Ｉ", "Ｊ", "Ｋ", "Ｌ", "Ｍ", "Ｎ", "Ｏ",
+    "Ｐ", "Ｑ", "Ｒ", "Ｓ", "Ｔ", "Ｕ", "Ｖ", "Ｗ", "Ｘ", "Ｙ", "Ｚ", "［",
+    "＼", "］", "＾", "＿", "｀", "ａ", "ｂ", "ｃ", "ｄ", "ｅ", "ｆ", "ｇ",
+    "ｈ", "ｉ", "ｊ", "ｋ", "ｌ", "ｍ", "ｎ", "ｏ", "ｐ", "ｑ", "ｒ", "ｓ",
+    "ｔ", "ｕ", "ｖ", "ｗ", "ｘ", "ｙ", "ｚ", "｛", "｜", "｝", "～",
+};
 
 GType ibus_array_engine_get_type (void) {
 	static GType type = 0;
@@ -144,6 +159,9 @@ void ibus_array_init (IBusBus *bus) {
     is_special_notify = FALSE;
     is_special_only = FALSE;
     is_output_simplified = FALSE;
+    is_use_shift = FALSE;
+    is_english_mode = FALSE;
+    is_fullwidth_mode = FALSE;
 
     /* load config */
     GVariant* value;
@@ -159,6 +177,18 @@ void ibus_array_init (IBusBus *bus) {
     value = ibus_config_get_value (config, "engine/Array", "OutputSimplified");
     if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
             is_output_simplified = g_variant_get_boolean(value);
+
+    value = ibus_config_get_value (config, "engine/Array", "UseShift");
+    if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
+            is_use_shift = g_variant_get_boolean(value);
+
+    value = ibus_config_get_value (config, "engine/Array", "Mode");
+    if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
+            is_english_mode = g_variant_get_boolean(value);
+
+    value = ibus_config_get_value (config, "engine/Array", "FullWidth");
+    if (value && g_variant_classify(value) == G_VARIANT_CLASS_BOOLEAN)
+            is_fullwidth_mode = g_variant_get_boolean(value);
 
     /* gettext preparation */
     setlocale (LC_ALL, "");
@@ -206,6 +236,14 @@ static void ibus_array_engine_class_init (IBusArrayEngineClass *klass)
 
 static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
 {
+    IBusProperty *mode_prop;
+    IBusText *mode_label;
+    IBusText *mode_tooltip;
+
+    IBusProperty *fullwidth_prop;
+    IBusText *fullwidth_label;
+    IBusText *fullwidth_tooltip;
+
     IBusProperty *setup_prop;
     IBusText *setup_label;
     IBusText *setup_tooltip;
@@ -217,6 +255,27 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
 
     arrayeng->table = ibus_lookup_table_new (10, 0, FALSE, TRUE);
     g_object_ref_sink (arrayeng->table);
+
+    mode_label = is_english_mode ?
+                 ibus_text_new_from_string (_("English mode")):
+                 ibus_text_new_from_string (_("Chinese mode"));
+    mode_tooltip = is_english_mode ?
+                   ibus_text_new_from_string (_("Switch to Chinese mode")):
+                   ibus_text_new_from_string (_("Switch to English mode"));
+    mode_prop = ibus_property_new("mode", PROP_TYPE_NORMAL, mode_label,
+                                  "gtk-convert", mode_tooltip, TRUE, TRUE, 0, NULL);
+    g_object_ref_sink (mode_prop);
+
+    fullwidth_label = is_fullwidth_mode ?
+                      ibus_text_new_from_string (_("Full width mode")):
+                      ibus_text_new_from_string (_("Half width mode"));
+    fullwidth_tooltip = is_fullwidth_mode ?
+                        ibus_text_new_from_string (_("Switch to Half width mode")):
+                        ibus_text_new_from_string (_("Switch to Full width mode"));
+    fullwidth_prop = ibus_property_new("fullwidth", PROP_TYPE_NORMAL,fullwidth_label,
+                                       "gtk-convert", fullwidth_tooltip, TRUE, TRUE, 0, NULL);
+    g_object_ref_sink (fullwidth_prop);
+
     setup_label = ibus_text_new_from_string (_("Setup"));
     setup_tooltip = ibus_text_new_from_string (_("Configure Array 30 engine"));
     setup_prop = ibus_property_new("setup", PROP_TYPE_NORMAL, setup_label, "gtk-preferences", setup_tooltip, TRUE, TRUE, 0, NULL);
@@ -225,6 +284,8 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
     arrayeng->prop_list = ibus_prop_list_new();
     g_object_ref_sink (arrayeng->prop_list);
 
+    ibus_prop_list_append(arrayeng->prop_list, mode_prop);
+    ibus_prop_list_append(arrayeng->prop_list, fullwidth_prop);
     ibus_prop_list_append(arrayeng->prop_list, setup_prop);
 
     g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed_cb), NULL);
@@ -511,8 +572,35 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         is_aux_shown = FALSE;
     }
 
-    if (modifiers & IBUS_RELEASE_MASK)
+    if (modifiers & IBUS_RELEASE_MASK) {
+        gboolean triggered = FALSE;
+
+        /* The keyval must be the same */
+        if (prev_pressed_key == keyval) {
+            if (keyval == IBUS_Shift_L || keyval == IBUS_Shift_R)
+                triggered = TRUE;
+        }
+
+        if (triggered) {
+            if (is_use_shift) {
+                ibus_array_engine_property_activate((IBusEngine *) engine,
+                                                    "mode",
+                                                    PROP_STATE_UNCHECKED);
+                return TRUE;
+            }
+        }
+
         return FALSE;
+    }
+
+    prev_pressed_key = keyval;
+
+    if ((modifiers & IBUS_SHIFT_MASK) && keyval == IBUS_space) {
+        ibus_array_engine_property_activate((IBusEngine *) engine,
+                                            "fullwidth",
+                                            PROP_STATE_UNCHECKED);
+        return TRUE;
+    }
 
     if (keyval == IBUS_Shift_L || keyval == IBUS_Shift_R)
         return FALSE;
@@ -520,6 +608,17 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
     if (modifiers & (IBUS_CONTROL_MASK | IBUS_MOD1_MASK))
         return FALSE;
 
+    if (is_english_mode) {
+        if (is_fullwidth_mode) {
+            if (keyval >= 32 && keyval - 32 < sizeof(sFullWidthTable)) {
+                IBusText* newtext = ibus_text_new_from_string(sFullWidthTable[keyval - 32]);
+                ibus_engine_commit_text((IBusEngine*)arrayeng, newtext);
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
 
     switch (keyval) {
     case IBUS_space:
@@ -619,7 +718,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         if (arrayeng->preedit->len >= 5)
                 return TRUE;
 
-	if (is_wildcard (keyval))
+        if (is_wildcard (keyval))
             arrayeng->wildcard_char_count ++;
 
         g_string_insert_c (arrayeng->preedit, arrayeng->cursor_pos, keyval);
@@ -628,6 +727,14 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
         ibus_array_engine_update (arrayeng);
 
         return TRUE;
+    }
+
+    if (is_fullwidth_mode) {
+        if (keyval >= 32 && keyval - 32 < sizeof(sFullWidthTable)) {
+            IBusText* newtext = ibus_text_new_from_string(sFullWidthTable[keyval - 32]);
+            ibus_engine_commit_text((IBusEngine*)arrayeng, newtext);
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -756,6 +863,8 @@ static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *array
 }
 
 static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, guint prop_state) {
+    IBusArrayEngine *arrayeng = (IBusArrayEngine*)engine;
+
     if (g_strcmp0(prop_name, "setup") == 0) {
         GError *error = NULL;
         gchar *argv[2] = { NULL, };
@@ -772,6 +881,56 @@ static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar
         g_spawn_async (NULL, argv, NULL, 0, NULL, NULL, NULL, &error);
 
         g_free(path);
+    } else if (g_strcmp0(prop_name, "mode") == 0) {
+        int i = 0;
+        IBusProperty *prop;
+        while ((prop = ibus_prop_list_get (arrayeng->prop_list, i)) != NULL) {
+            if(g_strcmp0(ibus_property_get_key(prop), prop_name) == 0) {
+                is_english_mode = !is_english_mode;
+
+                ibus_property_set_label (prop, is_english_mode?
+                            ibus_text_new_from_string (_("English mode")):
+                            ibus_text_new_from_string (_("Chinese mode")));
+                ibus_property_set_tooltip (prop, is_english_mode?
+                            ibus_text_new_from_string (_("Switch to Chinese mode")):
+                            ibus_text_new_from_string (_("Switch to English mode")));
+
+                ibus_engine_update_property(engine, prop);
+
+                ibus_config_set_value (config, "engine/Array", "Mode",
+                                       g_variant_new_boolean(is_english_mode));
+
+                ibus_array_engine_reset((IBusEngine*)arrayeng);
+                break;
+            }
+
+            i++;
+        }
+    } else if (g_strcmp0(prop_name, "fullwidth") == 0) {
+        int i = 0;
+        IBusProperty *prop;
+        while ((prop = ibus_prop_list_get (arrayeng->prop_list, i)) != NULL) {
+            if(g_strcmp0(ibus_property_get_key(prop), prop_name) == 0) {
+                is_fullwidth_mode = !is_fullwidth_mode;
+
+                ibus_property_set_label (prop, is_fullwidth_mode?
+                            ibus_text_new_from_string (_("Full width mode")):
+                            ibus_text_new_from_string (_("Half width mode")));
+                ibus_property_set_tooltip (prop, is_fullwidth_mode?
+                            ibus_text_new_from_string (_("Switch to Half width mode")):
+                            ibus_text_new_from_string (_("Switch to Full width mode")));
+
+                ibus_engine_update_property(engine, prop);
+
+                ibus_config_set_value (config, "engine/Array", "FullWidth",
+                                       g_variant_new_boolean(is_fullwidth_mode));
+
+                ibus_array_engine_reset((IBusEngine*)arrayeng);
+                break;
+            }
+
+            i++;
+        }
     }
 }
 
@@ -783,5 +942,7 @@ static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *secti
             is_special_only = g_variant_get_boolean (value);
         else if (g_strcmp0(name, "outputsimplified") == 0)
             is_output_simplified = g_variant_get_boolean (value);
+        else if (g_strcmp0(name, "useshift") == 0)
+            is_use_shift = g_variant_get_boolean (value);
 }
 

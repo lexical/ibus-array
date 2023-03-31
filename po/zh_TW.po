@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ibus-array 0.2.2\n"
 "Report-Msgid-Bugs-To: https://github.com/lexical/ibus-array/issues\n"
-"POT-Creation-Date: 2023-03-28 19:12+0800\n"
+"POT-Creation-Date: 2023-03-31 10:28+0800\n"
 "PO-Revision-Date: 2019-12-10 22:12+0800\n"
 "Last-Translator: Anthony Fok <foka@debian.org>\n"
 "Language-Team: Chinese (traditional)\n"
@@ -27,15 +27,47 @@ msgstr "行列"
 msgid "Array 30 Input Method 行列30輸入法"
 msgstr "行列30輸入法 Array 30 Input Method"
 
-#: src/engine.c:219
+#: src/engine.c:260 src/engine.c:892
+msgid "English mode"
+msgstr "英文模式"
+
+#: src/engine.c:261 src/engine.c:893
+msgid "Chinese mode"
+msgstr "中文模式"
+
+#: src/engine.c:263 src/engine.c:895
+msgid "Switch to Chinese mode"
+msgstr "切換到中文模式"
+
+#: src/engine.c:264 src/engine.c:896
+msgid "Switch to English mode"
+msgstr "切換到英文模式"
+
+#: src/engine.c:270 src/engine.c:917
+msgid "Full width mode"
+msgstr "全形字元模式"
+
+#: src/engine.c:271 src/engine.c:918
+msgid "Half width mode"
+msgstr "半形字元模式"
+
+#: src/engine.c:273 src/engine.c:920
+msgid "Switch to Half width mode"
+msgstr "切換到半形字元模式"
+
+#: src/engine.c:274 src/engine.c:921
+msgid "Switch to Full width mode"
+msgstr "切換到全形字元模式"
+
+#: src/engine.c:279
 msgid "Setup"
 msgstr "設定"
 
-#: src/engine.c:220
+#: src/engine.c:280
 msgid "Configure Array 30 engine"
 msgstr "設定行列輸入法"
 
-#: src/engine.c:504
+#: src/engine.c:566
 msgid ""
 "1.comma 2.bracket 3.symbol 4.math 5.arrow 6.unit 7.table 8.roman 9.greek 0."
 "bopomo"
@@ -56,3 +88,7 @@ msgstr "當有特別碼時，只能用特別碼輸入 (特別碼練習模式)"
 #: setup/main.py:58
 msgid "Convert output to simplified Chinese"
 msgstr "出字時轉為簡體中文"
+
+#: setup/main.py:60
+msgid "Use Shift to switch English/Chinese mode"
+msgstr "使用 Shift 切換中英文模式"
