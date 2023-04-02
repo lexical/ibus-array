@@ -622,14 +622,33 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 
     switch (keyval) {
     case IBUS_space:
-        if (arrayeng->preedit->len == 0)
+        if (arrayeng->preedit->len == 0) {
+            if (is_fullwidth_mode) {
+                if (keyval >= 32 && keyval - 32 < sizeof(sFullWidthTable)) {
+                    IBusText* newtext = ibus_text_new_from_string(sFullWidthTable[keyval - 32]);
+                    ibus_engine_commit_text((IBusEngine*)arrayeng, newtext);
+                    return TRUE;
+                }
+            }
+
             return FALSE;
+        }
+
         ibus_array_engine_space_press(arrayeng);
         return TRUE;
 
     case IBUS_apostrophe:
-        if (arrayeng->preedit->len == 0)
+        if (arrayeng->preedit->len == 0) {
+            if (is_fullwidth_mode) {
+                if (keyval >= 32 && keyval - 32 < sizeof(sFullWidthTable)) {
+                    IBusText* newtext = ibus_text_new_from_string(sFullWidthTable[keyval - 32]);
+                    ibus_engine_commit_text((IBusEngine*)arrayeng, newtext);
+                    return TRUE;
+                }
+            }
+
             return FALSE;
+        }
 
         /* The behavior of phrase key is like space key first time */
         if (arrayeng->space_press_count == 0) {
