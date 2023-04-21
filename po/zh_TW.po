@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ibus-array 0.2.2\n"
 "Report-Msgid-Bugs-To: https://github.com/lexical/ibus-array/issues\n"
-"POT-Creation-Date: 2023-03-31 10:28+0800\n"
+"POT-Creation-Date: 2023-04-22 00:11+0800\n"
 "PO-Revision-Date: 2019-12-10 22:12+0800\n"
 "Last-Translator: Anthony Fok <foka@debian.org>\n"
 "Language-Team: Chinese (traditional)\n"
@@ -27,35 +27,35 @@ msgstr "行列"
 msgid "Array 30 Input Method 行列30輸入法"
 msgstr "行列30輸入法 Array 30 Input Method"
 
-#: src/engine.c:260 src/engine.c:892
+#: src/engine.c:260 src/engine.c:915
 msgid "English mode"
 msgstr "英文模式"
 
-#: src/engine.c:261 src/engine.c:893
+#: src/engine.c:261 src/engine.c:916
 msgid "Chinese mode"
 msgstr "中文模式"
 
-#: src/engine.c:263 src/engine.c:895
+#: src/engine.c:263 src/engine.c:918
 msgid "Switch to Chinese mode"
 msgstr "切換到中文模式"
 
-#: src/engine.c:264 src/engine.c:896
+#: src/engine.c:264 src/engine.c:919
 msgid "Switch to English mode"
 msgstr "切換到英文模式"
 
-#: src/engine.c:270 src/engine.c:917
+#: src/engine.c:270 src/engine.c:940
 msgid "Full width mode"
 msgstr "全形字元模式"
 
-#: src/engine.c:271 src/engine.c:918
+#: src/engine.c:271 src/engine.c:941
 msgid "Half width mode"
 msgstr "半形字元模式"
 
-#: src/engine.c:273 src/engine.c:920
+#: src/engine.c:273 src/engine.c:943
 msgid "Switch to Half width mode"
 msgstr "切換到半形字元模式"
 
-#: src/engine.c:274 src/engine.c:921
+#: src/engine.c:274 src/engine.c:944
 msgid "Switch to Full width mode"
 msgstr "切換到全形字元模式"
 
