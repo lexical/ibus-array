@@ -662,6 +662,8 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 
             ibus_lookup_table_set_cursor_pos(arrayeng->table, 0);
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
+        } else if (arrayeng->table->candidates->len == 0) {
+            ibus_array_engine_reset((IBusEngine*)arrayeng);
         }
         return TRUE;
 
@@ -806,6 +808,8 @@ static void ibus_array_engine_space_press (IBusArrayEngine *arrayeng)
 
             ibus_lookup_table_set_cursor_pos(arrayeng->table, 0);
             commit_rev = ibus_array_engine_commit_current_candidate(arrayeng);
+        } else if (arrayeng->table->candidates->len == 0) {
+            ibus_array_engine_reset((IBusEngine*)arrayeng);
         }
     }
     else if (arrayeng->space_press_count == 1) {
