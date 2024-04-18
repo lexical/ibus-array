@@ -20,6 +20,7 @@
 */
 
 #include <ibus.h>
+#include "config.h"
 #include "engine.h"
 
 

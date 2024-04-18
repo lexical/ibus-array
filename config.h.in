@@ -1,0 +1,5 @@
+#define PACKAGE "@PACKAGE@"
+#define LOCALEDIR "@LOCALEDIR@"
+#define LIBEXECDIR "@LIBEXECDIR@"
+#define PKGDATADIR "@PKGDATADIR@"
+#mesondefine HAVE_OPENCC
