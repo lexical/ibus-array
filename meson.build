@@ -2,7 +2,7 @@ project(
     'ibus-array',
     'c',
     license: 'GPL-2.0-or-later',
-    version: '0.2.2'
+    version: '0.2.3'
 )
 
 python = import('python')
