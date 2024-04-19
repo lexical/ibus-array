@@ -1,0 +1,1 @@
+option('enable_opencc', type: 'feature', value: 'enabled')

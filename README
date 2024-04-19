@@ -7,6 +7,6 @@ The source code can be obtained from:
 To test your contribution locally
 1. Make sure `ibus-array` is working before your changes.
 2. Locate the working installation of `ibus-array` (likely under `/usr`).
-3. Use `autogen.sh --prefix` to specify where `make install` copies your custom build to.
-4. `make` and `make install` your changes, make sure it overwrites existing installation.
+3. Use `meson build --prefix` to specify where `meson install` copies your custom build to.
+4. `cd build && meson compile` and `meeson install` your changes, make sure it overwrites existing installation.
 5. `kill` and restart `ibus-daemon --xim`.
