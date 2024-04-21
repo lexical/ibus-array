@@ -52,6 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libexecdir}/ibus-setup-array
 
 %changelog
+* Sun Apr 21 2024 Danilo Chang <ray2501@gmail.com> - 0.2.3
 * Fri Jul 17 2020 Keng-Yu Lin <kengyu@debian.org> - 0.2.2
 * Sat Apr 22 2009 Yu-Chun Wang <mainlander1122@gmail.com> - 0.0.1
 - The first version.
