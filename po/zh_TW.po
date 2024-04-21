@@ -4,9 +4,9 @@
 # This file is distributed under the same license as the ibus-package package.
 msgid ""
 msgstr ""
-"Project-Id-Version: ibus-array 0.2.2\n"
+"Project-Id-Version: ibus-array 0.2.3\n"
 "Report-Msgid-Bugs-To: https://github.com/lexical/ibus-array/issues\n"
-"POT-Creation-Date: 2023-04-22 00:11+0800\n"
+"POT-Creation-Date: 2024-04-21 20:50+0800\n"
 "PO-Revision-Date: 2019-12-10 22:12+0800\n"
 "Last-Translator: Anthony Fok <foka@debian.org>\n"
 "Language-Team: Chinese (traditional)\n"
@@ -15,15 +15,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/array.inputMethod.xml.in.in:5
+#: src/array.inputMethod.xml.in:5
 msgid "Array 30 Input Method Component"
 msgstr "行列30輸入法元件"
 
-#: src/array.inputMethod.xml.in.in:24
+#: src/array.inputMethod.xml.in:24
 msgid "Array"
 msgstr "行列"
 
-#: src/array.inputMethod.xml.in.in:25
+#: src/array.inputMethod.xml.in:25
 msgid "Array 30 Input Method 行列30輸入法"
 msgstr "行列30輸入法 Array 30 Input Method"
 
