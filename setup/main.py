@@ -65,14 +65,10 @@ class Setup:
         current_output_simplified = self.__read("OutputSimplified", False)
         current_use_shift = self.__read("UseShift", False)
 
-        if current_special_notify:
-            self.__special_notify_button.set_active(True)
-        if current_special_mode:
-            self.__special_only_button.set_active(True)
-        if current_output_simplified:
-            self.__output_simplified_button.set_active(True)
-        if current_use_shift:
-            self.__use_shift_button.set_active(True)
+        self.__special_notify_button.set_active(current_special_notify)
+        self.__special_only_button.set_active(current_special_mode)
+        self.__output_simplified_button.set_active(current_output_simplified)
+        self.__use_shift_button.set_active(current_use_shift)
 
         self.__window.show_all()
 
@@ -110,35 +106,24 @@ class Setup:
 
     def on_value_changed(self, config, section, name, value, data):
         if section == 'engine/Array':
+            active = value.get_boolean()
             if name == 'SpecialNotify':
-                if value:
-                    self.__special_notify_button.set_active(True)
-                else:
-                    self.__special_notify_button.set_active(False)
+                self.__special_notify_button.set_active(active)
 
             elif name == 'SpecialOnly':
-                if value:
-                    self.__special_only_button.set_active(True)
-                else:
-                    self.__special_only_button.set_active(False)
+                self.__special_only_button.set_active(active)
 
             elif name == 'OutputSimplified':
-                if value:
-                    self.__output_simplified_button.set_active(True)
-                else:
-                    self.__output_simplified_button.set_active(False)
+                self.__output_simplified_button.set_active(active)
 
             elif name == 'UseShift':
-                if value:
-                    self.__use_shift_button.set_active(True)
-                else:
-                    self.__use_shift_button.set_active(False)
+                self.__use_shift_button.set_active(active)
 
     def __read(self, name, v):
         value = self.__config.get_value("engine/Array", name)
         if value is None:
             return v
-        return value
+        return value.get_boolean()
 
     def __write(self, name, v):
         return self.__config.set_value("engine/Array", name, v)

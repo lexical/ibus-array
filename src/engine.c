@@ -102,6 +102,7 @@ static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *secti
 
 static IBusEngineClass *parent_class = NULL;
 static IBusConfig *config = NULL;
+static gulong config_value_changed_handler = 0;
 static gboolean is_special_notify;
 static gboolean is_special_only;
 static gboolean is_output_simplified;
@@ -151,8 +152,11 @@ void ibus_array_init (IBusBus *bus) {
     array_context = array_create_context();
 
     config = ibus_bus_get_config (bus);
-    if (config)
+    if (config) {
         g_object_ref_sink (config);
+        config_value_changed_handler = g_signal_connect (config, "value-changed",
+                                                         G_CALLBACK(ibus_config_value_changed_cb), NULL);
+    }
 
     is_special_notify = FALSE;
     is_special_only = FALSE;
@@ -207,8 +211,14 @@ void ibus_array_exit (void)
 
     array_release_context(array_context);
 
-    if (g_object_is_floating (config))
+    if (config) {
+        if (config_value_changed_handler) {
+            g_signal_handler_disconnect(config, config_value_changed_handler);
+            config_value_changed_handler = 0;
+        }
         g_object_unref(config);
+        config = NULL;
+    }
 }
 
 static void ibus_array_engine_class_init (IBusArrayEngineClass *klass)
@@ -286,7 +296,6 @@ static void ibus_array_engine_init (IBusArrayEngine *arrayeng)
     ibus_prop_list_append(arrayeng->prop_list, fullwidth_prop);
     ibus_prop_list_append(arrayeng->prop_list, setup_prop);
 
-    g_signal_connect (config, "value-changed", G_CALLBACK(ibus_config_value_changed_cb), NULL);
 }
 
 static void ibus_array_engine_destroy (IBusArrayEngine *arrayeng) {
