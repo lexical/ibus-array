@@ -60,17 +60,67 @@ static gchar* valid_key_map[] = {
     " ?", //?
 };
 
+static gboolean
+array_context_is_available(ArrayContext *context)
+{
+    return context != NULL && context->conn != NULL;
+}
+
+static gboolean
+array_prepare_query(ArrayContext *context, const gchar *sql, sqlite3_stmt **stmt)
+{
+    int retcode;
+
+    *stmt = NULL;
+
+    if (!array_context_is_available(context))
+        return FALSE;
+
+    retcode = sqlite3_prepare_v2(context->conn, sql, -1, stmt, NULL);
+    if (retcode != SQLITE_OK) {
+        g_warning("Failed to prepare array.db query: %s", sqlite3_errmsg(context->conn));
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static GArray*
+array_query_candidates(ArrayContext *context, const gchar *sql, const gchar *keys)
+{
+    GArray *result;
+    sqlite3_stmt *stmt;
+
+    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
+
+    if (!array_prepare_query(context, sql, &stmt))
+        return result;
+
+    sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const gchar *candidate = (const gchar*)sqlite3_column_text(stmt, 0);
+        gchar *candidate_copy = g_strdup(candidate);
+        g_array_append_val(result, candidate_copy);
+    }
+
+    sqlite3_finalize(stmt);
+
+    return result;
+}
+
 ArrayContext* array_create_context() {
     ArrayContext *context = (ArrayContext*)g_malloc(sizeof(ArrayContext));
 
     if (sqlite3_open(ARRAY_DB_FILE_PATH, &(context->conn)) != SQLITE_OK) {
+        g_warning("Failed to open array.db: %s", sqlite3_errmsg(context->conn));
+        sqlite3_close(context->conn);
         context->conn = NULL;
     }
     return context;
 }
 
 void array_release_context(ArrayContext *context) {
-    if (context-> conn != NULL) {
+    if (context && context->conn != NULL) {
         sqlite3_close(context->conn);
     }
 
@@ -122,139 +172,30 @@ void array_release_candidates(GArray *candidates) {
 }
 
 GArray* array_get_candidates_from_main(ArrayContext *context, gchar *keys, guint wildcard_char_count) {
-    GArray *result;
-    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
-
-    sqlite3_stmt *stmt;
-
-    int retcode;
     if (!wildcard_char_count)
-        retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE keys=?", -1, &stmt, NULL);
+        return array_query_candidates(context, "SELECT ch FROM main WHERE keys=?", keys);
     else
-        retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE keys GLOB ?", -1, &stmt, NULL);
-
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
-            gchar *chstr = g_strdup(ch);
-            g_array_append_val(result, chstr);
-        }
-    }
-    sqlite3_reset(stmt);
-    sqlite3_finalize(stmt);
-
-    return result;
+        return array_query_candidates(context, "SELECT ch FROM main WHERE keys GLOB ?", keys);
 }
 
 GArray* array_get_candidates_from_phrase(ArrayContext *context, gchar *keys) {
-    GArray *result;
-    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
-
-    sqlite3_stmt *stmt;
-
-    int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ph FROM phrase WHERE keys=?", -1, &stmt, NULL);
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
-            gchar *chstr = g_strdup(ch);
-            g_array_append_val(result, chstr);
-        }
-    }
-    sqlite3_reset(stmt);
-    sqlite3_finalize(stmt);
-
-    return result;
+    return array_query_candidates(context, "SELECT ph FROM phrase WHERE keys=?", keys);
 }
 
 GArray* array_get_candidates_from_simple(ArrayContext *context, gchar *keys) {
-    GArray *result;
-    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
-
-    sqlite3_stmt *stmt;
-
-    int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM simple WHERE keys=?", -1, &stmt, NULL);
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
-            gchar *chstr = g_strdup(ch);
-            g_array_append_val(result, chstr);
-        }
-    }
-    sqlite3_reset(stmt);
-    sqlite3_finalize(stmt);
-
-    return result;
+    return array_query_candidates(context, "SELECT ch FROM simple WHERE keys=?", keys);
 }
 
 GArray* array_get_candidates_from_special(ArrayContext *context, gchar *keys) {
-    GArray *result;
-    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
-
-    sqlite3_stmt *stmt;
-
-    int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE cat='2' AND keys=?", -1, &stmt, NULL);
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
-            gchar *chstr = g_strdup(ch);
-            g_array_append_val(result, chstr);
-        }
-    }
-    sqlite3_reset(stmt);
-    sqlite3_finalize(stmt);
-
-    return result;
+    return array_query_candidates(context, "SELECT ch FROM main WHERE cat='2' AND keys=?", keys);
 }
 
 GArray* array_get_reverted_key_candidates_from_special(ArrayContext *context, gchar *ch) {
-    GArray *result;
-    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
-
-    sqlite3_stmt *stmt;
-
-    int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT keys FROM main WHERE cat='2' AND ch=?", -1, &stmt, NULL);
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, ch, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *keys = (gchar*)sqlite3_column_text(stmt, 0);
-            gchar *keysstr = g_strdup(keys);
-            g_array_append_val(result, keysstr);
-        }
-    }
-    sqlite3_reset(stmt);
-    sqlite3_finalize(stmt);
-
-    return result;
+    return array_query_candidates(context, "SELECT keys FROM main WHERE cat='2' AND ch=?", ch);
 }
 
 GArray* array_get_reverted_char_candidates_from_special(ArrayContext *context, gchar *keys) {
-    GArray *result;
-    result = (GArray*)g_array_new(FALSE, FALSE, sizeof(gchar*));
-
-    sqlite3_stmt *stmt;
-
-    int retcode;
-    retcode = sqlite3_prepare_v2(context->conn, "SELECT ch FROM main WHERE cat='2' AND keys=?", -1, &stmt, NULL);
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, keys, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
-            gchar *chstr = g_strdup(ch);
-            g_array_append_val(result, chstr);
-        }
-    }
-    sqlite3_reset(stmt);
-    sqlite3_finalize(stmt);
-
-    return result;
+    return array_query_candidates(context, "SELECT ch FROM main WHERE cat='2' AND keys=?", keys);
 }
 
 gboolean
@@ -263,21 +204,19 @@ array_input_key_is_not_special(ArrayContext* context,
 {
     sqlite3_stmt *stmt;
 
-    int retcode;
     gboolean result = FALSE;
     gchar *special_keys = NULL;
 
-    retcode = sqlite3_prepare_v2(context->conn,
-            "SELECT keys FROM main WHERE cat='2' AND ch=?", -1, &stmt, NULL);
-
-    if (retcode == SQLITE_OK) {
-        sqlite3_bind_text(stmt, 1, ch, -1, SQLITE_TRANSIENT);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-            gchar *ch = (gchar*)sqlite3_column_text(stmt, 0);
-            special_keys = g_strdup(ch);
-        }
+    if (!array_prepare_query(context,
+            "SELECT keys FROM main WHERE cat='2' AND ch=?", &stmt)) {
+        return FALSE;
     }
-    sqlite3_reset(stmt);
+
+    sqlite3_bind_text(stmt, 1, ch, -1, SQLITE_TRANSIENT);
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const gchar *special_ch = (const gchar*)sqlite3_column_text(stmt, 0);
+        special_keys = g_strdup(special_ch);
+    }
     sqlite3_finalize(stmt);
 
     if (special_keys == NULL)
