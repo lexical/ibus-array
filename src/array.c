@@ -130,7 +130,7 @@ void array_release_context(ArrayContext *context) {
 GString* array_get_preedit_string(GString *preedit) {
     GString *result = g_string_new("");
 
-    int i;
+    gsize i;
     for (i = 0; i < preedit->len; i++) {
         gchar c = preedit->str[i];
         int index = -1;
@@ -163,7 +163,7 @@ GString* array_get_preedit_string(GString *preedit) {
 }
 
 void array_release_candidates(GArray *candidates) {
-    int i;
+    guint i;
     for (i = 0; i < candidates->len; i++) {
         gchar *s = g_array_index(candidates, gchar*, i);
         g_free(s);

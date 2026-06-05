@@ -55,6 +55,8 @@ struct _IBusArrayEngineClass {
 /* functions prototype */
 static void ibus_array_engine_class_init (IBusArrayEngineClass *klass);
 static void ibus_array_engine_init (IBusArrayEngine *engine);
+static void ibus_array_engine_class_init_wrapper (gpointer klass, gpointer class_data);
+static void ibus_array_engine_init_wrapper (GTypeInstance *instance, gpointer klass);
 static void ibus_array_engine_destroy (IBusArrayEngine *engine);
 
 static gboolean ibus_array_engine_process_key_event (IBusEngine *engine, guint keyval, guint keycode, guint modifiers);
@@ -110,10 +112,10 @@ static gboolean is_use_shift;
 static gboolean is_english_mode;
 static gboolean is_fullwidth_mode;
 static gboolean is_aux_shown = FALSE;
-static gint prev_pressed_key = IBUS_VoidSymbol;
+static guint prev_pressed_key = IBUS_VoidSymbol;
 static ArrayContext *array_context = NULL;
 #ifdef HAVE_OPENCC
-static opencc_t cc_handle = NULL;;
+static opencc_t cc_handle = NULL;
 #endif
 
 static char *sFullWidthTable[] = {
@@ -127,6 +129,18 @@ static char *sFullWidthTable[] = {
     "ｔ", "ｕ", "ｖ", "ｗ", "ｘ", "ｙ", "ｚ", "｛", "｜", "｝", "～",
 };
 
+static void ibus_array_engine_class_init_wrapper (gpointer klass, gpointer class_data)
+{
+    (void) class_data;
+    ibus_array_engine_class_init ((IBusArrayEngineClass *) klass);
+}
+
+static void ibus_array_engine_init_wrapper (GTypeInstance *instance, gpointer klass)
+{
+    (void) klass;
+    ibus_array_engine_init ((IBusArrayEngine *) instance);
+}
+
 GType ibus_array_engine_get_type (void) {
 	static GType type = 0;
 
@@ -134,12 +148,13 @@ GType ibus_array_engine_get_type (void) {
 		sizeof (IBusArrayEngineClass),
 		(GBaseInitFunc)	NULL,
 		(GBaseFinalizeFunc) NULL,
-		(GClassInitFunc) ibus_array_engine_class_init,
+		ibus_array_engine_class_init_wrapper,
 		NULL,
 		NULL,
 		sizeof (IBusArrayEngine),
 		0,
-		(GInstanceInitFunc) ibus_array_engine_init,
+		ibus_array_engine_init_wrapper,
+		NULL,
 	};
 
 	if (type == 0)
@@ -349,7 +364,7 @@ static void ibus_array_engine_focus_out (IBusEngine *engine) {
 }
 
 static void ibus_array_engine_update_lookup_table (IBusArrayEngine *arrayeng) {
-    gint i;
+    guint i;
 
     if (arrayeng->preedit->len == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
@@ -424,7 +439,7 @@ static void ibus_array_engine_update_preedit (IBusArrayEngine *arrayeng) {
 
 static gboolean ibus_array_engine_update_phrase_lookup_table (IBusArrayEngine *arrayeng)
 {
-    gint i;
+    guint i;
 
     if (arrayeng->preedit->len == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
@@ -458,7 +473,7 @@ static gboolean ibus_array_engine_update_phrase_lookup_table (IBusArrayEngine *a
 
 static gboolean ibus_array_engine_update_symbol_lookup_table (IBusArrayEngine *arrayeng)
 {
-    gint i;
+    guint i;
 
     if (arrayeng->preedit->len == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) arrayeng);
@@ -572,6 +587,7 @@ static void ibus_array_engine_update (IBusArrayEngine *arrayeng) {
 
 static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint keyval, guint keycode, guint modifiers) {
     IBusArrayEngine *arrayeng = (IBusArrayEngine *)engine;
+    (void) keycode;
 
     if (g_strcmp0(arrayeng->preedit->str, "w") == 0) {
         ibus_array_engine_update_auxiliary_text(arrayeng, _("1.comma 2.bracket 3.symbol 4.math 5.arrow 6.unit 7.table 8.roman 9.greek 0.bopomo"));
@@ -776,6 +792,8 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
 }
 
 static gboolean ibus_array_engine_process_candidate_key_event (IBusArrayEngine *arrayeng, guint keyval, guint modifiers) {
+    (void) modifiers;
+
     if (keyval >= IBUS_0 && keyval <= IBUS_9) {
         guint page_no;
         guint page_size;
@@ -896,6 +914,7 @@ static void ibus_array_engine_show_special_code_for_char (IBusArrayEngine *array
 
 static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar *prop_name, guint prop_state) {
     IBusArrayEngine *arrayeng = (IBusArrayEngine*)engine;
+    (void) prop_state;
 
     if (g_strcmp0(prop_name, "setup") == 0) {
         GError *error = NULL;
@@ -967,6 +986,9 @@ static void ibus_array_engine_property_activate (IBusEngine *engine, const gchar
 }
 
 static void ibus_config_value_changed_cb (IBusConfig *config, const gchar *section,  const gchar *name, GVariant *value, gpointer unused) {
+    (void) config;
+    (void) unused;
+
     if (g_strcmp0(section, "engine/Array") == 0) {
         if (g_strcmp0(name, "SpecialNotify") == 0)
             is_special_notify = g_variant_get_boolean (value);

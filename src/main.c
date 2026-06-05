@@ -41,6 +41,9 @@ static void
 ibus_disconnected_cb (IBusBus  *bus,
                       gpointer  user_data)
 {
+    (void) bus;
+    (void) user_data;
+
     ibus_quit ();
 }
 
