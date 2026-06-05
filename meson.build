@@ -21,7 +21,7 @@ config_data.set('PYTHON', python3.full_path())
 config_data.set('LOCALEDIR', get_option('prefix') / get_option('localedir'))
 config_data.set('LIBEXECDIR', get_option('prefix') / get_option('libexecdir'))
 config_data.set('PKGDATADIR', get_option('prefix') / get_option('datadir') / meson.project_name())
-if get_option('enable_opencc').enabled()
+if opencc.found()
     config_data.set10('HAVE_OPENCC', true)
 endif
 configure_file(
@@ -42,7 +42,7 @@ sources = files([
 ])
 
 dependencies = [ibus, sqlite3]
-if get_option('enable_opencc').enabled()
+if opencc.found()
     dependencies += opencc
 endif
 
