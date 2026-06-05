@@ -16,6 +16,9 @@ db_file        = sys.argv[4]
 data_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Create schema from scratch
+if os.path.exists(db_file):
+    os.unlink(db_file)
+
 con = sqlite3.connect(db_file)
 cur = con.cursor()
 cur.executescript("""
@@ -33,6 +36,11 @@ CREATE TABLE "phrase" (
     `keys` VARCHAR(4) NOT NULL,
     `ph`   TEXT NOT NULL
 );
+CREATE INDEX "idx_main_keys" ON "main" (`keys`);
+CREATE INDEX "idx_main_cat_keys" ON "main" (`cat`, `keys`);
+CREATE INDEX "idx_main_cat_ch" ON "main" (`cat`, `ch`);
+CREATE INDEX "idx_simple_keys" ON "simple" (`keys`);
+CREATE INDEX "idx_phrase_keys" ON "phrase" (`keys`);
 """)
 con.commit()
 con.close()

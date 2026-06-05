@@ -63,129 +63,98 @@ def array_updatedb(table_file, db_file="array.db"):
         f = open(table_file, 'r')
         for ln in f.readlines():
             ln = ln.strip()
-            print("This is ln: " + ln)
 
             if  (ln == "%chardef begin"):
-                print("This is begin")
                 #REG_STACK.append(-1)
+                pass
 
             if  (ln == "# Begin of " + STR_UNIFIED_Base):
-                print("Enter: " + STR_UNIFIED_Base)
                 REG_STACK.append(REGION_UNIFIED_Base)
 
             elif(ln == "# Begin of " + STR_ARRAY_SPECIAL):
-                print("Enter: " + STR_ARRAY_SPECIAL)
                 REG_STACK.append(REGION_ARRAY_SPECIAL)
 
             elif(ln == "# Begin of " + STR_ARRAY_COMPATIBLE):
-                print("Enter: " + STR_ARRAY_COMPATIBLE)
                 REG_STACK.append(REGION_ARRAY_COMPATIBLE)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtA):
-                print("Enter: " + STR_UNIFIED_ExtA)
                 REG_STACK.append(REGION_UNIFIED_ExtA)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtB):
-                print("Enter: " + STR_UNIFIED_ExtB)
                 REG_STACK.append(REGION_UNIFIED_ExtB)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtC):
-                print("Enter: " + STR_UNIFIED_ExtC)
                 REG_STACK.append(REGION_UNIFIED_ExtC)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtD):
-                print("Enter: " + STR_UNIFIED_ExtD)
                 REG_STACK.append(REGION_UNIFIED_ExtD)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtE):
-                print("Enter: " + STR_UNIFIED_ExtE)
                 REG_STACK.append(REGION_UNIFIED_ExtE)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtF):
-                print("Enter: " + STR_UNIFIED_ExtF)
                 REG_STACK.append(REGION_UNIFIED_ExtF)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtG):
-                print("Enter: " + STR_UNIFIED_ExtG)
                 REG_STACK.append(REGION_UNIFIED_ExtG)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtH):
-                print("Enter: " + STR_UNIFIED_ExtH)
                 REG_STACK.append(REGION_UNIFIED_ExtH)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtI):
-                print("Enter: " + STR_UNIFIED_ExtI)
                 REG_STACK.append(REGION_UNIFIED_ExtI)
 
             elif(ln == "# Begin of " + STR_UNIFIED_ExtJ):
-                print("Enter: " + STR_UNIFIED_ExtJ)
                 REG_STACK.append(REGION_UNIFIED_ExtJ)
 
             elif(ln == "# Begin of " + STR_ARRAY_SYMBOL):
-                print("Enter: " + STR_ARRAY_SYMBOL)
                 REG_STACK.append(REGION_ARRAY_SYMBOL)
 
             elif(ln == "# End of " + STR_UNIFIED_Base):
-                print("Exit: " + STR_UNIFIED_Base)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_ARRAY_SPECIAL):
-                print("Exit: " + STR_ARRAY_SPECIAL)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_ARRAY_COMPATIBLE):
-                print("Exit: " + STR_ARRAY_COMPATIBLE)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtA):
-                print("Exit: " + STR_UNIFIED_ExtA)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtB):
-                print("Exit: " + STR_UNIFIED_ExtB)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtC):
-                print("Exit: " + STR_UNIFIED_ExtC)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtD):
-                print("Exit: " + STR_UNIFIED_ExtD)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtE):
-                print("Exit: " + STR_UNIFIED_ExtE)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtF):
-                print("Exit: " + STR_UNIFIED_ExtF)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtG):
-                print("Exit: " + STR_UNIFIED_ExtG)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtH):
-                print("Exit: " + STR_UNIFIED_ExtH)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtI):
-                print("Exit: " + STR_UNIFIED_ExtI)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_UNIFIED_ExtJ):
-                print("Exit: " + STR_UNIFIED_ExtJ)
                 REG_STACK.pop()
 
             elif(ln == "# End of " + STR_ARRAY_SYMBOL):
-                print("Exit: " + STR_ARRAY_SYMBOL)
                 REG_STACK.pop()
 
             elif(ln == "%chardef end"):
-                print("this is final")
                 if REG_STACK:
                     REG_STACK.pop()
-                    print(REG_STACK)
 
             else:
                 if(len(REG_STACK) == 0 or len(ln.strip()) == 0):
@@ -194,7 +163,6 @@ def array_updatedb(table_file, db_file="array.db"):
                 else:
                     # Write data to SQL Database
                     r = (str(REG_STACK[-1]) + "\t" + ln).split()
-                    print(r)
                     cur.execute('INSERT INTO main (keys, ch, cat, cnt) VALUES ("' + r[1] + '", "' + r[2] + '", "' + r[0] + '", "0")') 
 
         f.close()
