@@ -1,6 +1,6 @@
 array_db = custom_target('array.db',
     input: [
-        'array30-OpenVanilla-big-v2026-1.02-20260407.cin',
+        'array30-OpenVanilla-big.cin',
         'array30-phrase-20260528.txt',
         'array-shortcode-20210725.cin',
     ],
