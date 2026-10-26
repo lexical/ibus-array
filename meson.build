@@ -2,7 +2,7 @@ project(
     'ibus-array',
     'c',
     license: 'GPL-2.0-or-later',
-    version: '0.3.2',
+    version: '0.3.3',
     meson_version: '>=1.1'
 )
 
