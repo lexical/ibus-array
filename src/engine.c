@@ -613,7 +613,7 @@ static gboolean  ibus_array_engine_process_key_event (IBusEngine *engine, guint 
                 ibus_array_engine_property_activate((IBusEngine *) engine,
                                                     "mode",
                                                     PROP_STATE_UNCHECKED);
-                return TRUE;
+                prev_pressed_key = 0;
             }
         }
 
